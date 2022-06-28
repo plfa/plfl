@@ -19,7 +19,6 @@ theorem add_assoc : ∀ (m n p : Nat), (m + n) + p = m + (n + p)
       _ = m + succ (n + p)    := by rw [add_succ m (n + p)]
       _ = m + (n + succ p)    := by rw [add_succ n p]
 
-
 theorem zero_add : ∀ (n : Nat), zero + n = n
   | zero =>
     calc
@@ -44,7 +43,19 @@ theorem succ_add : ∀ (m n : Nat), (succ m) + n = succ (m + n)
       _ = succ (succ (m + n))  := by rw [succ_add m n]
       _ = succ (m + (succ n))  := rfl
 
-
+theorem comm_add : ∀ (m n : Nat), m + n = n + m
+  | zero , n =>
+    calc
+      zero + n
+        = n                     := by rw [zero_add n]
+      _ = n + zero              := rfl
+  | succ m , n =>
+    calc
+      (succ m) + n
+        = succ (m + n)          := by rw [succ_add m n]
+      _ = succ (n + m)          := by rw [comm_add m n]
+      _ = n + (succ m)          := rfl
+      
   
   -- congrArg succ (zero_add n)
 
