@@ -27,6 +27,24 @@ theorem add_assoc : ∀ (m n p : Nat), m + (n + p) = (m + n) + p
       _ = succ ((m + n) + p)  := by rw [add_assoc m n p]
       _ = (m + n) + succ p    := by rw [add_succ (m + n) p]
 
+theorem add_assoc' : ∀ (m n p : Nat), m + (n + p) = (m + n) + p
+  := by
+      intros m n p
+      induction p with
+      | zero =>
+          calc
+            m + (n + zero)
+              = m + n               := by rfl
+            _ = (m + n) + zero      := by rfl
+      | succ p ih =>
+          calc
+            m + (n + succ p)
+              = m + succ (n + p)    := by rfl
+            _ = succ (m + (n + p))  := by rfl
+            _ = succ ((m + n) + p)  := by rw [ih]
+            _ = (m + n) + succ p    := by rfl
+
+
 theorem zero_add : ∀ (n : Nat), zero + n = n
   | zero =>
     calc
