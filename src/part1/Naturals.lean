@@ -6,7 +6,7 @@ inductive Nat where
 
 open Nat
 
-def convert : _root_.Nat → Nat 
+def convert : _root_.Nat → Nat
   | _root_.Nat.zero    =>  zero
   | _root_.Nat.succ n  =>  succ (convert n)
 
@@ -22,7 +22,7 @@ instance : Add Nat where
 
 example : 3 + 2 = (5 : Nat) :=
   calc
-    3 + 2 
+    3 + 2
       =  succ (3 + 1)         := rfl
     _ =  succ (succ (3 + 0))  := rfl
     _ =  succ (succ 3)        := rfl
@@ -40,7 +40,7 @@ instance : Mul Nat where
 
 example : 3 * 2 = (6 : Nat) :=
   calc
-    3 * 2  
+    3 * 2
       =  (3 * 1 + 3 : Nat)     := rfl
     _ =  (3 * 0 + 3 + 3 : Nat) := rfl
     _ =  (0 + 3 + 3 : Nat)     := rfl
@@ -56,14 +56,14 @@ instance : Sub Nat where
 
 example : 3 - 2 = (1 : Nat) :=
   calc
-    3 - 2  
+    3 - 2
       =  (2 - 1 : Nat)  := rfl
     _ =  (1 - 0 : Nat)  := rfl
     _ =  (1 : Nat)      := rfl
 
 example : 2 - 3 = (0 : Nat) :=
   calc
-    2 - 3  
+    2 - 3
       =  (1 - 2 : Nat)  := rfl
     _ =  (0 - 1 : Nat)  := rfl
     _ =  (0 : Nat)      := rfl
