@@ -85,3 +85,18 @@ theorem comm_add : ∀ (m n : Nat), m + n = n + m
   
   -- congrArg succ (zero_add n)
 
+class Zero (α : Type) where
+  zero : α
+
+instance : Zero Nat where
+  zero := Nat.zero
+
+class Monoid (α : Type) extends Add α, Zero α where
+  add_assoc : ∀ (m n p : Nat), (m + n) + p = m + (n + p)
+  add_zero : ∀ (n : Nat), n + 0 = n
+  zero_add : ∀ (n : Nat), 0 + n = n
+
+instance : Monoid Nat where
+  add_assoc := Nat.add_assoc
+  add_zero := Nat.add_zero
+  zero_add := Nat.zero_add
