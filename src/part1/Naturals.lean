@@ -10,7 +10,7 @@ def convert : _root_.Nat → Nat
   | _root_.Nat.zero    =>  zero
   | _root_.Nat.succ n  =>  succ (convert n)
 
-instance : OfNat Nat n where
+instance (n : _root_.Nat) : OfNat Nat n where
   ofNat := convert n
 
 def add : Nat → Nat → Nat
