@@ -101,3 +101,11 @@ instance : Monoid Nat where
   add_assoc := Nat.add_assoc
   add_zero := Nat.add_zero
   zero_add := Nat.zero_add
+
+-- exercises
+
+theorem left_distrib (m n p : Nat) :
+  m * (n + p) = m * n + m * p := sorry
+
+
+
