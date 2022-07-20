@@ -85,7 +85,7 @@ def is_zero : Nat → Prop
 | succ n => False
 
 theorem succ_neq_zero (n : Nat) : ¬ (succ n = 0)
-  := λ succ_eq_zero => succ_eq_zero (refl 0)
+  := sorry
 
 
 
