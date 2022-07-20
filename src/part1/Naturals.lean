@@ -10,7 +10,7 @@ def convert : _root_.Nat → Nat
   | _root_.Nat.zero    =>  zero
   | _root_.Nat.succ n  =>  succ (convert n)
 
-instance : OfNat Nat n where
+instance (n : _root_.Nat) : OfNat Nat n where
   ofNat := convert n
 
 def add : Nat → Nat → Nat
@@ -67,6 +67,26 @@ example : 2 - 3 = (0 : Nat) :=
       =  (1 - 2 : Nat)  := rfl
     _ =  (0 - 1 : Nat)  := rfl
     _ =  (0 : Nat)      := rfl
+
+def monus1 : Nat → Nat
+| zero => zero
+| succ n => n
+
+theorem invert (m n : Nat) : succ m = succ n → m = n
+  := by
+    intro succ_m_eq_succ_n
+    calc
+      m = monus1 (succ m)  := by rfl
+      _ = monus1 (succ n)  := by rw [succ_m_eq_succ_n]
+      _ = n                := by rfl
+
+def is_zero : Nat → Prop
+| zero => True
+| succ n => False
+
+theorem succ_neq_zero (n : Nat) : ¬ (succ n = 0)
+  := sorry
+
 
 
 
