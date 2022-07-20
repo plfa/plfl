@@ -17,6 +17,13 @@ def add : Nat → Nat → Nat
   | m , zero   => m
   | m , succ n => succ (add m n)
 
+-- the following are defined in lean4/src/Init/Prelude.lean
+
+-- class Add (α : Type) where
+--   add : α → α → α 
+
+-- infixl:65   " + " => Add.add
+
 instance : Add Nat where
   add := add
 
@@ -82,11 +89,17 @@ theorem invert (m n : Nat) : succ m = succ n → m = n
 
 def is_zero : Nat → Prop
 | zero => True
-| succ n => False
+| succ _ => False
 
-theorem succ_neq_zero (n : Nat) : ¬ (succ n = 0)
-  := sorry
+theorem invert' (m n : Nat) (h : succ m = succ n) : m = n
+  := by injection h with h' ; exact h'  
 
+theorem succ_neq_zero (n : Nat) (h : succ n = zero) : False
+  := by injection h
+
+theorem succ_neq_zero' (n : Nat) (h : succ n = zero) : False
+  := by contradiction
+  
 
 
 
