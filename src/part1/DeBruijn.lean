@@ -83,18 +83,18 @@ prefix:50 "ƛ" => term.lambda
 infixl:70 "⬝" => term.application
 notation:max "o" => term.zero
 postfix:80 "+1" => term.succ
-notation:max "switch" L "[ o ⇒" M "| +1 ⇒" N "]" => term.case L M N
+notation:max "switch" => term.case
 prefix:50 "μ" => term.mu
 
-instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
-  ofNat := lookup.stop
+-- instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
+--   ofNat := lookup.stop
 
-instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
-  ofNat := lookup.pop (OfNat.ofNat n)
+-- instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
+--   ofNat := lookup.pop (OfNat.ofNat n)
   
 def two : ∀ {Γ}, Γ ⊢ ℕ := o +1 +1
 def plus : ∀ {Γ}, Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
-  μ ƛ ƛ switch (# Z) [ o ⇒ # S Z | +1 ⇒ (# S S S Z ⬝ # S S Z ⬝ # Z) +1 ]
+  μ ƛ ƛ (switch (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
 def four : ∀ {Γ}, Γ ⊢ ℕ := plus ⬝ two ⬝ two
 
 def rmap (Γ Δ : TpEnv) : Type :=
@@ -111,32 +111,113 @@ infix:30 "→ˢ" => smap
 infix:30 "→ᵗ" => tmap
 
 def ren_ext {Γ Δ : TpEnv} {A :Tp} (ρ : Γ →ʳ Δ) : (Γ ▷ A →ʳ Δ ▷ A)
-| _ , Z  =>  Z
-| _ , S x  =>  S (ρ x)
+  | _ , Z  =>  Z
+  | _ , S x  =>  S (ρ x)
 
 def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
-| _ , (# x) => # (ρ x)
-| _ , (ƛ N) => ƛ (ren (ren_ext ρ) N)
-| _ , (L ⬝ M) => ren ρ L ⬝ ren ρ M
-| _ , o => o
-| _ , M +1 => ren ρ M +1
-| _ , switch L [ o ⇒ M | +1 ⇒ N ] =>
-    switch (ren ρ L) [ o ⇒ (ren ρ M) | +1 ⇒ (ren (ren_ext ρ) N) ]
-| _ , μ N => μ (ren (ren_ext ρ) N)
+  | _ , (# x) => # (ρ x)
+  | _ , (ƛ N) => ƛ (ren (ren_ext ρ) N)
+  | _ , (L ⬝ M) => ren ρ L ⬝ ren ρ M
+  | _ , o => o
+  | _ , M +1 => ren ρ M +1
+  | _ , switch L M N =>
+        switch (ren ρ L) (ren ρ M) (ren (ren_ext ρ) N)
+  | _ , μ N => μ (ren (ren_ext ρ) N)
 
 def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
 
-def sub_ext {Γ Δ : TpEnv} {A :Tp} (ρ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
+def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)   
 | _ , Z  =>  # Z
-| _ , S x  =>  lift (ρ x)
+| _ , S x  =>  lift (σ x)
 
-def sub {Γ Δ : TpEnv} (ρ : Γ →ˢ Δ) : Γ →ᵗ Δ
-| _ , (# x) => ρ x
-| _ , (ƛ N) => ƛ (sub (sub_ext ρ) N)
-| _ , (L ⬝ M) => sub ρ L ⬝ sub ρ M
-| _ , o => o
-| _ , M +1 => sub ρ M +1
-| _ , switch L [ o ⇒ M | +1 ⇒ N ] =>
-    switch (sub ρ L) [ o ⇒ (sub ρ M) | +1 ⇒ (sub (sub_ext ρ) N) ]
-| _ , μ N => μ (sub (sub_ext ρ) N)
+def sub {Γ Δ : TpEnv} (σ : Γ →ˢ Δ) : Γ →ᵗ Δ
+  | _ , (# x) => σ x
+  | _ , (ƛ N) => ƛ (sub (sub_ext σ) N)
+  | _ , (L ⬝ M) => sub σ L ⬝ sub σ M
+  | _ , o => o
+  | _ , M +1 => sub σ M +1
+  | _ , switch L M N =>
+        switch (sub σ L) (sub σ M) (sub (sub_ext σ) N)
+  | _ , μ N => μ (sub (sub_ext σ) N)
+
+def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
+  | _ , Z    =>  M
+  | _ , S x  =>  # x
+
+def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
+  := sub (sigma_0 M) N 
+
+inductive Value : Γ ⊢ A → Prop where
+  | lambda :
+      Value (ƛ N)
+  | zero :
+      Value o
+  | succ :
+      Value V → Value (V +1)
+
+inductive reduce : Γ ⊢ A → Γ ⊢ A → Prop where
+  | xi_app_1 :
+      reduce L L' → reduce (L ⬝ M) (L' ⬝ M)
+  | xi_app_2 :
+      Value V → reduce M M' → reduce (V ⬝ M) (V ⬝ M')
+  | beta :
+      Value W → reduce ((ƛ N) ⬝ W) (subst N W)
+  | xi_succ :
+      reduce M M' → reduce (M +1) (M' +1)
+  | xi_case :
+      reduce L L' → reduce (switch L M N) (switch L' M N)
+  | beta_zero :
+      reduce (switch o M N) M
+  | beta_succ :
+      Value V → reduce (switch (V +1) M N) (subst N V)
+  | beta_mu :
+      reduce (μ N) (subst N (μ N))
+      
+open reduce
+
+infix:20 "—→" => reduce
+
+inductive reduce_tran : Γ ⊢ A → Γ ⊢ A → Prop where
+  | none :
+      reduce_tran M M
+  | tran :
+      ∀ L, reduce L M → reduce_tran M N → reduce_tran L N
+  
+inductive Progress : Γ ⊢ A → Prop where
+  | step :
+      (M —→ N) → Progress M
+  | done :
+      Value V → Progress V
+
+open Progress 
+
+theorem progress : ∀ (M : ∅ ⊢ A), Progress M
+  | (# x) => by contradiction
+  | (ƛ N) => done Value.lambda
+  | (L ⬝ M) =>
+      match progress L with
+        | step L_to_L' => step (xi_app_1 L_to_L')
+        | done v =>
+            match progress M with
+              | step M_to_M' => step (xi_app_2 v M_to_M')
+              | done w =>
+                  match v with
+                    | Value.lambda => step (beta w)
+  | o => done Value.zero
+  | (M +1) =>
+      match progress M with
+        | step M_to_M' => step (xi_succ M_to_M')
+        | done v => done (Value.succ v)
+  | (switch L M N) =>
+      match progress L with
+        | step L_to_L' => step (xi_case L_to_L')
+        | done v =>
+            match v with
+              | Value.zero => step beta_zero
+              | Value.succ v => step (beta_succ v)
+  | (μ N) => step beta_mu
+
+
+
+
 
