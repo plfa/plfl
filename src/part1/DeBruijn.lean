@@ -17,10 +17,8 @@ inductive Tp : Type where
 | natural : Tp
 | function : Tp → Tp → Tp
 
-open Tp
-
-notation:max "ℕ" => natural
-infixr:70 "⇒" => function
+notation:max "ℕ" => Tp.natural
+infixr:70 "⇒" => Tp.function
 
 example : Tp := ℕ ⇒ ℕ 
 
@@ -74,7 +72,6 @@ inductive term : TpEnv → Tp → Type where
         --------------
       → term Γ A
 
-
 infix:40  "∋" => lookup
 infix:40  "⊢" => term
 
@@ -98,4 +95,32 @@ instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
 def two : ∀ {Γ}, Γ ⊢ ℕ := o +1 +1
 def plus : ∀ {Γ}, Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   μ ƛ ƛ switch (# Z) [ o ⇒ # S Z | +1 ⇒ (# S S S Z ⬝ # S S Z ⬝ # Z) +1 ]
+def four : ∀ {Γ}, Γ ⊢ ℕ := plus ⬝ two ⬝ two
+
+def rmap (Γ Δ : TpEnv) : Type :=
+  ∀ {A : Tp}, (Γ ∋ A) → (Δ ∋ A)
+
+def smap (Γ Δ : TpEnv) : Type :=
+  ∀ {A : Tp}, (Γ ∋ A) → (Δ ⊢ A)
+
+def tmap (Γ Δ : TpEnv) : Type :=
+  ∀ {A : Tp}, (Γ ⊢ A) → (Δ ⊢ A)
+
+infix:30 "→ʳ" => rmap 
+infix:30 "→ˢ" => smap
+infix:30 "→ᵗ" => tmap
+
+def ren_ext {Γ Δ : TpEnv} {A :Tp} (ρ : Γ →ʳ Δ) : (Γ ▷ A →ʳ Δ ▷ A)
+| _ , Z  =>  Z
+| _ , S x  =>  S (ρ x)
+
+def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
+| _ , (# x) => # (ρ x)
+| _ , (ƛ N) => ƛ (ren (ren_ext ρ) N)
+| _ , (L ⬝ M) => ren ρ L ⬝ ren ρ M
+| _ , o => o
+| _ , M +1 => ren ρ M +1
+| _ , switch L [ o ⇒ M | +1 ⇒ N ] =>
+    switch (ren ρ L) [ o ⇒ (ren ρ M) | +1 ⇒ (ren (ren_ext ρ) N) ]
+| _ , μ N => μ (ren (ren_ext ρ) N)
 
