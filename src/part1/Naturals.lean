@@ -17,12 +17,15 @@ def add : Nat → Nat → Nat
   | m , zero   => m
   | m , succ n => succ (add m n)
 
--- the following are defined in lean4/src/Init/Prelude.lean
-
+-- from lean4/src/Init/Prelude.lean
 -- class Add (α : Type) where
 --   add : α → α → α 
+-- class Mul (α : Type) where
+--   mul : α → α → α 
 
--- infixl:65   " + " => Add.add
+-- from lean4/src/Init/Notation.lean (simplified)
+-- infixl:65 " + "   => Add.add
+-- infixl:70 " * "   => Mul.mul
 
 instance : Add Nat where
   add := add
