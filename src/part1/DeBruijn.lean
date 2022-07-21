@@ -124,3 +124,19 @@ def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
     switch (ren ρ L) [ o ⇒ (ren ρ M) | +1 ⇒ (ren (ren_ext ρ) N) ]
 | _ , μ N => μ (ren (ren_ext ρ) N)
 
+def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
+
+def sub_ext {Γ Δ : TpEnv} {A :Tp} (ρ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
+| _ , Z  =>  # Z
+| _ , S x  =>  lift (ρ x)
+
+def sub {Γ Δ : TpEnv} (ρ : Γ →ˢ Δ) : Γ →ᵗ Δ
+| _ , (# x) => ρ x
+| _ , (ƛ N) => ƛ (sub (sub_ext ρ) N)
+| _ , (L ⬝ M) => sub ρ L ⬝ sub ρ M
+| _ , o => o
+| _ , M +1 => sub ρ M +1
+| _ , switch L [ o ⇒ M | +1 ⇒ N ] =>
+    switch (sub ρ L) [ o ⇒ (sub ρ M) | +1 ⇒ (sub (sub_ext ρ) N) ]
+| _ , μ N => μ (sub (sub_ext ρ) N)
+
