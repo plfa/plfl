@@ -213,7 +213,7 @@ inductive Progress : Γ ⊢ A → Type where
 
 open Progress 
 
-theorem progress : ∀ (M : ∅ ⊢ A), Progress M
+def progress : ∀ (M : ∅ ⊢ A), Progress M
   | (# x) => by contradiction
   | (ƛ N) => done Value.lambda
   | (L ⬝ M) =>
