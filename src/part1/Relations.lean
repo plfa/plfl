@@ -42,7 +42,7 @@ theorem invert : ∀ {m n : Nat}, succ m ≤ succ n -> m ≤ n
 -- Proof is by induction, but induction tactic does not apply.
 -- Note explicit application of "invert"
 
-[@trans] def trans_le : ∀ {m n p : Nat}, m ≤ n → n ≤ p → m ≤ p
+def trans_le : ∀ {m n p : Nat}, m ≤ n → n ≤ p → m ≤ p
   := by
        intros m n p m_le_n n_le_p
        induction n_le_p with
@@ -79,6 +79,14 @@ inductive lt2 : Nat → Nat → Prop where
       lt2 m n
       ---------------------
     → lt2 (succ m) (succ n)
+
+inductive lt3 : Nat → Nat → Prop where
+| m_lt_sm : ∀ {m}, lt3 m (succ m)
+| m_lt_sn : ∀ {m n},
+      lt2 m n
+      ---------------------
+    → lt2 m (succ n)
+
 
 
 
