@@ -39,6 +39,7 @@ inductive lookup : TpEnv → Tp → Type where
        lookup Γ B 
        ----------------
      → lookup (Γ ▷ A) B
+  deriving Repr
 
 inductive term : TpEnv → Tp → Type where
   | var :
@@ -71,6 +72,7 @@ inductive term : TpEnv → Tp → Type where
         term (Γ ▷ A) A
         --------------
       → term Γ A
+  deriving Repr
 
 infix:40  "∋" => lookup
 infix:40  "⊢" => term
@@ -147,15 +149,16 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
   := sub (sigma_0 M) N 
 
-inductive Value : Γ ⊢ A → Prop where
+inductive Value : Γ ⊢ A → Type where
   | lambda :
       Value (ƛ N)
   | zero :
       Value o
   | succ :
       Value V → Value (V +1)
+  deriving Repr
 
-inductive reduce : Γ ⊢ A → Γ ⊢ A → Prop where
+inductive reduce : Γ ⊢ A → Γ ⊢ A → Type where
   | xi_app_1 :
       reduce L L' → reduce (L ⬝ M) (L' ⬝ M)
   | xi_app_2 :
@@ -172,22 +175,41 @@ inductive reduce : Γ ⊢ A → Γ ⊢ A → Prop where
       Value V → reduce (switch (V +1) M N) (subst N V)
   | beta_mu :
       reduce (μ N) (subst N (μ N))
+  deriving Repr
       
 open reduce
 
-infix:20 "—→" => reduce
+infix:20 "~>" => reduce
 
-inductive reduce_tran : Γ ⊢ A → Γ ⊢ A → Prop where
-  | none :
-      reduce_tran M M
-  | tran :
-      ∀ L, reduce L M → reduce_tran M N → reduce_tran L N
-  
-inductive Progress : Γ ⊢ A → Prop where
+inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
+  | nil :
+      reduce_many M M
+  | cons :
+      ∀ L, reduce L M → reduce_many M N → reduce_many L N
+  deriving Repr
+
+open reduce_many 
+
+infix:20 "~>>"  => reduce_many 
+
+theorem reduce_many_trans : (L ~>> M) → (M ~>> N) → (L ~>> N) 
+  := by
+      intros L_to_M M_to_N
+      induction L_to_M with
+      | nil =>
+        exact M_to_N
+      | cons _ L_to_P _ ih =>
+        apply cons
+        exact L_to_P
+        apply ih
+        exact M_to_N 
+
+inductive Progress : Γ ⊢ A → Type where
   | step :
-      (M —→ N) → Progress M
+      (M ~> N) → Progress M
   | done :
       Value V → Progress V
+  deriving Repr
 
 open Progress 
 
@@ -217,7 +239,30 @@ theorem progress : ∀ (M : ∅ ⊢ A), Progress M
               | Value.succ v => step (beta_succ v)
   | (μ N) => step beta_mu
 
+inductive Finished (N : ∅ ⊢ A) : Type where
+  | done : Value N → Finished N
+  | out_of_gas : Finished N
+  deriving Repr
 
+open Finished
+
+inductive Steps (L : ∅ ⊢ A) : Type where
+  | steps : (L ~>> N) → Finished N → Steps L
+  deriving Repr
+
+open Steps
+
+def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
+  match n with
+    | Nat.zero => steps nil out_of_gas
+    | Nat.succ n => 
+        match progress L with
+          | Progress.done v => Steps.steps nil (done v)
+          | @Progress.step _ _ _ M L_to_M =>
+              match evaluate n M with
+                | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
+
+#eval (evaluate 100 four)
 
 
 
