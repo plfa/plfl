@@ -49,10 +49,10 @@ def trans_le : ∀ {m n p : Nat}, m ≤ n → n ≤ p → m ≤ p
        | refl => assumption
        | step n_le_p ih => apply step; exact ih
 
-example : 2 ≤ 5 :=
-  calc
-    2 ≤ 2  := refl
-    _ ≤ 3  := step _
+example : 2 ≤ 5 := step (step (step refl))
+--  calc
+--    2 ≤ 2  := refl
+--    _ ≤ 3  := step _
 
 -- Exercise.
 -- Here is a different definition of ≤.
@@ -71,7 +71,7 @@ inductive le2 : Nat → Nat → Prop
 open le2
 
 -- Exercise.
--- Prove lt and lt2 equivalent.
+-- Prove lt, lt2, and lt3 equivalent.
 
 inductive lt2 : Nat → Nat → Prop where
 | z_lt_s : ∀ {n}, lt2 zero (succ n)
@@ -83,10 +83,13 @@ inductive lt2 : Nat → Nat → Prop where
 inductive lt3 : Nat → Nat → Prop where
 | m_lt_sm : ∀ {m}, lt3 m (succ m)
 | m_lt_sn : ∀ {m n},
-      lt2 m n
+      lt3 m n
       ---------------------
-    → lt2 m (succ n)
+    → lt3 m (succ n)
 
+-- Exercise. Prove the following.
+--   m ≤ n iff ∃ p, m + p = n
+--   m < n iff ∃ p, p ≠ 0 ∧ m + p = n
 
 
 
