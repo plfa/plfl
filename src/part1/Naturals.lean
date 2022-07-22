@@ -19,9 +19,9 @@ def add : Nat → Nat → Nat
 
 -- from lean4/src/Init/Prelude.lean
 -- class Add (α : Type) where
---   add : α → α → α 
+--   add : α → α → α
 -- class Mul (α : Type) where
---   mul : α → α → α 
+--   mul : α → α → α
 
 -- from lean4/src/Init/Notation.lean (simplified)
 -- infixl:65 " + "   => Add.add
@@ -95,14 +95,14 @@ def is_zero : Nat → Prop
 | succ _ => False
 
 theorem invert' (m n : Nat) (h : succ m = succ n) : m = n
-  := by injection h with h' ; exact h'  
+  := by injection h with h' ; exact h'
 
 theorem succ_neq_zero (n : Nat) (h : succ n = zero) : False
   := by injection h
 
 theorem succ_neq_zero' (n : Nat) (h : succ n = zero) : False
   := by contradiction
-  
+
 
 
 

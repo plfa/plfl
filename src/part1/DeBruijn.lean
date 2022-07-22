@@ -1,18 +1,5 @@
 namespace DeBruijn
 
--- infix:40  "⊢"
--- infix:40  "∋"
--- infixl:50 "▷"
--- infixr:70 "⇒"
--- prefix:50 "ƛ"
--- prefix:50 "μ"
--- infixl:70 "·"
--- postifx:80 "+1"
--- notation:90 "0"
--- prefix:90 "`"
--- prefix:90 "S"
--- prefix:90 "#"
-
 inductive Tp : Type where
 | natural : Tp
 | function : Tp → Tp → Tp
@@ -20,7 +7,7 @@ inductive Tp : Type where
 notation:max "ℕ" => Tp.natural
 infixr:70 "⇒" => Tp.function
 
-example : Tp := ℕ ⇒ ℕ 
+example : Tp := ℕ ⇒ ℕ
 
 inductive TpEnv : Type where
 | empty : TpEnv
@@ -32,11 +19,11 @@ infixl:50 "▷" => TpEnv.extend
 example : TpEnv := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
 
 inductive lookup : TpEnv → Tp → Type where
-  | stop : 
+  | stop :
        ----------------
        lookup (Γ ▷ A) A
-  | pop : 
-       lookup Γ B 
+  | pop :
+       lookup Γ B
        ----------------
      → lookup (Γ ▷ A) B
   deriving Repr
@@ -61,9 +48,9 @@ inductive term : TpEnv → Tp → Type where
   | succ :
         term Γ ℕ
         --------
-      → term Γ ℕ 
+      → term Γ ℕ
   | case :
-        term Γ ℕ 
+        term Γ ℕ
       → term Γ A
       → term (Γ ▷ ℕ) A
         ---------------
@@ -93,7 +80,7 @@ prefix:50 "μ" => term.mu
 
 -- instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
 --   ofNat := lookup.pop (OfNat.ofNat n)
-  
+
 def two : ∀ {Γ}, Γ ⊢ ℕ := o +1 +1
 def plus : ∀ {Γ}, Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   μ ƛ ƛ (switch (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
@@ -108,7 +95,7 @@ def smap (Γ Δ : TpEnv) : Type :=
 def tmap (Γ Δ : TpEnv) : Type :=
   ∀ {A : Tp}, (Γ ⊢ A) → (Δ ⊢ A)
 
-infix:30 "→ʳ" => rmap 
+infix:30 "→ʳ" => rmap
 infix:30 "→ˢ" => smap
 infix:30 "→ᵗ" => tmap
 
@@ -128,7 +115,7 @@ def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
 
 def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
 
-def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)   
+def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
 | _ , Z  =>  # Z
 | _ , S x  =>  lift (σ x)
 
@@ -147,7 +134,7 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
   | _ , S x  =>  # x
 
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
-  := sub (sigma_0 M) N 
+  := sub (sigma_0 M) N
 
 inductive Value : Γ ⊢ A → Type where
   | lambda :
@@ -176,7 +163,7 @@ inductive reduce : Γ ⊢ A → Γ ⊢ A → Type where
   | beta_mu :
       reduce (μ N) (subst N (μ N))
   deriving Repr
-      
+
 open reduce
 
 infix:20 "~>" => reduce
@@ -188,11 +175,11 @@ inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
       ∀ L, reduce L M → reduce_many M N → reduce_many L N
   deriving Repr
 
-open reduce_many 
+open reduce_many
 
-infix:20 "~>>"  => reduce_many 
+infix:20 "~>>"  => reduce_many
 
-theorem reduce_many_trans : (L ~>> M) → (M ~>> N) → (L ~>> N) 
+theorem reduce_many_trans : (L ~>> M) → (M ~>> N) → (L ~>> N)
   := by
       intros L_to_M M_to_N
       induction L_to_M with
@@ -202,7 +189,7 @@ theorem reduce_many_trans : (L ~>> M) → (M ~>> N) → (L ~>> N)
         apply cons
         exact L_to_P
         apply ih
-        exact M_to_N 
+        exact M_to_N
 
 inductive Progress : Γ ⊢ A → Type where
   | step :
@@ -211,7 +198,7 @@ inductive Progress : Γ ⊢ A → Type where
       Value V → Progress V
   deriving Repr
 
-open Progress 
+open Progress
 
 def progress : ∀ (M : ∅ ⊢ A), Progress M
   | (# x) => by contradiction
@@ -255,7 +242,7 @@ open Steps
 def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
   match n with
     | Nat.zero => steps nil out_of_gas
-    | Nat.succ n => 
+    | Nat.succ n =>
         match progress L with
           | Progress.done v => Steps.steps nil (done v)
           | @Progress.step _ _ _ M L_to_M =>
@@ -264,5 +251,8 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
 
 #eval (evaluate 100 four)
 
-
+-- Exercise. Add products, as detailed in
+--  https://plfa.inf.ed.ac.uk/More/#products
+-- Pick suitable notations for introduction and elimination
+-- of products that won't conflict.
 
