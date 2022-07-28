@@ -168,6 +168,26 @@ open reduce
 
 infix:20 "~>" => reduce
 
+-- inductive star : (Γ ⊢ A) → (Γ ⊢ A) → Type where
+--   | none :
+--       star M M
+--   | one :
+--         (M ~> N)
+--         ----------
+--       → star M N
+--   | two :
+--         star L M
+--       → star M N
+--         ----------
+--       → star L N
+
+-- infix:20 "~>*" => star
+
+-- instance : Trans (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
+--                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
+--                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type) where
+--   trans := star.two
+  
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
       reduce_many M M
@@ -250,6 +270,8 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
                 | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
 
 #eval (evaluate 100 four)
+
+
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products
