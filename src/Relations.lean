@@ -24,7 +24,27 @@ inductive le : Nat → Nat → Prop
 instance : LE Nat where
   le := le
 
-theorem invert : ∀ {m n : Nat}, succ m ≤ succ n -> m ≤ n
+theorem zero_le_n : ∀ {n : Nat}, 0 ≤ n
+  := by
+      intros n
+      induction n with
+      | zero =>
+          exact le.refl
+      | succ _ ih =>
+          apply le.step
+          exact ih
+
+theorem succ_le_succ : ∀ {m n : Nat}, m ≤ n → succ m ≤ succ n
+  := by 
+      intros m n m_le_n
+      induction m_le_n with
+      | refl =>
+         exact le.refl
+      | step _ ih =>
+         apply le.step
+         exact ih
+
+theorem invert : ∀ {m n : Nat}, succ m ≤ succ n → m ≤ n 
   := by
       intros m n sm_le_sn
       cases sm_le_sn with
@@ -56,6 +76,64 @@ example : 2 ≤ 7 :=
     _ ≤ 5 := le.step le.refl 
     _ ≤ 7 := le.step (le.step le.refl)
 
+-- Strict inequality
+
+def lt (n m : Nat) := le (succ n) m
+
+instance : LT Nat where
+  lt := lt
+
+theorem le_of_lt : ∀ {m n : Nat}, m < n → m ≤ n
+  := by
+      intros
+      apply invert
+      apply le.step
+      assumption
+      
+theorem trans_lt_of_lt_of_le : ∀ {m n p : Nat}, m < n → n ≤ p → m < p
+  := by
+      intros
+      apply trans_le
+      assumption
+      assumption
+
+theorem trans_lt_of_le_of_lt : ∀ {m n p : Nat}, m ≤ n → n < p → m < p
+  := by
+      intros
+      apply trans_le
+      apply succ_le_succ
+      assumption
+      assumption
+      
+theorem trans_lt : ∀ {m n p : Nat}, m < n → n < p → m < p
+  := by
+      intros
+      apply trans_lt_of_lt_of_le
+      assumption
+      apply le_of_lt
+      assumption
+
+instance : Trans (.<. : Nat → Nat → Prop)
+                 (.<. : Nat → Nat → Prop)
+                 (.<. : Nat → Nat → Prop) where
+  trans := trans_lt
+
+instance : Trans (.≤. : Nat → Nat → Prop)
+                 (.<. : Nat → Nat → Prop)
+                 (.<. : Nat → Nat → Prop) where
+  trans := trans_lt_of_le_of_lt
+
+instance : Trans (.<. : Nat → Nat → Prop)
+                 (.≤. : Nat → Nat → Prop)
+                 (.<. : Nat → Nat → Prop) where
+  trans := trans_lt_of_lt_of_le
+
+example : 2 < 7 :=
+  calc
+    2 ≤ 4 := le.step (le.step le.refl)
+    _ < 5 := le.refl 
+    _ ≤ 7 := le.step (le.step le.refl)
+
 -- Exercise.
 -- Here is a different definition of ≤.
 -- Prove the two definitions equivalent,
@@ -70,14 +148,8 @@ inductive le2 : Nat → Nat → Prop
       ---------------------
     → le2 (succ m) (succ n)
 
-
 -- Exercise.
 -- Prove lt, lt2, and lt3 equivalent.
-
-def lt (n m : Nat) := le (succ n) m
-
-instance : LT Nat where
-  lt := lt
 
 inductive lt2 : Nat → Nat → Prop where
 | z_lt_s : ∀ {n}, lt2 zero (succ n)
