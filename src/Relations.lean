@@ -56,6 +56,16 @@ example : 2 ≤ 7 :=
     _ ≤ 5 := le.step le.refl 
     _ ≤ 7 := le.step (le.step le.refl)
 
+-- Strict inequality
+
+def lt (n m : Nat) := le (succ n) m
+
+instance : LT Nat where
+  lt := lt
+
+theorem le_of_lt : ∀ {m n : Nat}, m < n → m ≤ n
+  := by sorry
+
 -- Exercise.
 -- Here is a different definition of ≤.
 -- Prove the two definitions equivalent,
@@ -73,11 +83,6 @@ inductive le2 : Nat → Nat → Prop
 
 -- Exercise.
 -- Prove lt, lt2, and lt3 equivalent.
-
-def lt (n m : Nat) := le (succ n) m
-
-instance : LT Nat where
-  lt := lt
 
 inductive lt2 : Nat → Nat → Prop where
 | z_lt_s : ∀ {n}, lt2 zero (succ n)
