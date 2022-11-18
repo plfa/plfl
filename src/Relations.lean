@@ -159,8 +159,8 @@ theorem antisymm : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
       | s_le_s _ ih => 
         cases n_le_m with
         | s_le_s n_le_m =>
-          apply congr rfl
-          exact ih n_le_m 
+            rw [ih n_le_m]
+          
 
 theorem antisymm' : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
   | z_le_n , z_le_n => rfl
