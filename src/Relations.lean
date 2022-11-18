@@ -78,11 +78,16 @@ example : 2 ≤ 7 :=
 
 -- Strict inequality
 
-def lt (n m : Nat) := le (succ n) m
+def lt (n m : Nat) := le (Nat.succ n) m
 
 instance : LT Nat where
   lt := lt
 
+theorem lt_succ : ∀ {n : Nat}, n < succ n
+  := by
+      intros
+      exact le.refl
+  
 theorem le_of_lt : ∀ {m n : Nat}, m < n → m ≤ n
   := by
       intros
@@ -131,7 +136,7 @@ instance : Trans (.<. : Nat → Nat → Prop)
 example : 2 < 7 :=
   calc
     2 ≤ 4 := le.step (le.step le.refl)
-    _ < 5 := le.refl 
+    _ < 5 := lt_succ  
     _ ≤ 7 := le.step (le.step le.refl)
 
 -- Exercise.
@@ -148,9 +153,11 @@ inductive le2 : Nat → Nat → Prop
       ---------------------
     → le2 (succ m) (succ n)
 
+open le2
+
 theorem antisymm : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
   := by
-      intros m n m_le_n n_le_m
+      intros _ _ m_le_n n_le_m
       induction m_le_n with
       | z_le_n =>
         cases n_le_m with
@@ -163,8 +170,8 @@ theorem antisymm : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
           
 
 theorem antisymm' : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
-  | z_le_n , z_le_n => rfl
-  | (s_le_s m_le_n), (s_le_s n_le_m) => antisymm' m_le_n n_le_m
+| _ , _ , z_le_n , z_le_n => rfl
+| _ , _ , s_le_s m_le_n , s_le_s n_le_m => by rw [antisymm' m_le_n n_le_m]
 
 -- Exercise.
 -- Prove lt, lt2, and lt3 equivalent.
