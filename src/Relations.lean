@@ -140,13 +140,31 @@ example : 2 < 7 :=
 -- that is, that each implies the other.
 
 inductive le2 : Nat → Nat → Prop
-| z_le_n :
+| z_le_n : ∀ {n : Nat},
       ----------
       le2 zero n
-| s_le_s :
+| s_le_s : ∀ {m n : Nat},
       le2 m n
       ---------------------
     → le2 (succ m) (succ n)
+
+theorem antisymm : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
+  := by
+      intros m n m_le_n n_le_m
+      induction m_le_n with
+      | z_le_n =>
+        cases n_le_m with
+        | z_le_n =>
+            rfl
+      | s_le_s _ ih => 
+        cases n_le_m with
+        | s_le_s n_le_m =>
+          apply congr rfl
+          exact ih n_le_m 
+
+theorem antisymm' : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
+  | z_le_n , z_le_n => rfl
+  | (s_le_s m_le_n), (s_le_s n_le_m) => antisymm' m_le_n n_le_m
 
 -- Exercise.
 -- Prove lt, lt2, and lt3 equivalent.
