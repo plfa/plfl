@@ -95,7 +95,7 @@ instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
 example : 2 = (S S Z : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) := rfl
 
 def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
-  μ ƛ ƛ (switch (# 0) (# 1) ((# 3 ⬝ # S S Z ⬝ # Z) +1))
+  μ ƛ ƛ (switch (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
 def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
 
@@ -106,7 +106,7 @@ def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
   ƛ (# Z +1)
 def Ch (A : Tp) : Tp := (A ⇒ A) ⇒ A ⇒ A
 def two_c : Γ ⊢ Ch A :=
-  ƛ ƛ (# S Z ⬝ (# 1 ⬝ # 0))
+  ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
 -- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
 def plus_c : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
   ƛ ƛ ƛ ƛ (# S S S Z ⬝ # S Z ⬝ (# S S Z ⬝ # S Z ⬝ # Z))
@@ -277,7 +277,7 @@ example : (suc_c ⬝ 1 : ∅ ⊢ ℕ) ~> 2
 
 example : two ~>> 2 :=
   calc
-    two_c ⬝ suc_c ⬝ 0
+    (two_c ⬝ suc_c ⬝ 0 : ∅ ⊢ ℕ)
       ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0  := xi_app_1 (beta Value.lambda)
     _ ~> (suc_c ⬝ (suc_c ⬝ 0))            := beta Value.zero
     _ ~> suc_c ⬝ 1                       := xi_app_2 Value.lambda (beta Value.zero)

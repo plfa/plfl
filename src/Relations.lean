@@ -35,7 +35,7 @@ theorem zero_le_n : ∀ {n : Nat}, 0 ≤ n
           exact ih
 
 theorem succ_le_succ : ∀ {m n : Nat}, m ≤ n → succ m ≤ succ n
-  := by 
+  := by
       intros m n m_le_n
       induction m_le_n with
       | refl =>
@@ -44,7 +44,7 @@ theorem succ_le_succ : ∀ {m n : Nat}, m ≤ n → succ m ≤ succ n
          apply le.step
          exact ih
 
-theorem invert : ∀ {m n : Nat}, succ m ≤ succ n → m ≤ n 
+theorem invert : ∀ {m n : Nat}, succ m ≤ succ n → m ≤ n
   := by
       intros m n sm_le_sn
       cases sm_le_sn with
@@ -72,9 +72,9 @@ instance : Trans (.≤. : Nat → Nat → Prop)
 
 example : 2 ≤ 7 :=
   calc
-    2 ≤ 4 := le.step (le.step le.refl)
-    _ ≤ 5 := le.step le.refl 
-    _ ≤ 7 := le.step (le.step le.refl)
+    (2 : Nat) ≤ 4 := le.step (le.step le.refl)
+    _         ≤ 5 := le.step le.refl
+    _         ≤ 7 := le.step (le.step le.refl)
 
 -- Strict inequality
 
@@ -87,14 +87,14 @@ theorem lt_succ : ∀ {n : Nat}, n < succ n
   := by
       intros
       exact le.refl
-  
+
 theorem le_of_lt : ∀ {m n : Nat}, m < n → m ≤ n
   := by
       intros
       apply invert
       apply le.step
       assumption
-      
+
 theorem trans_lt_of_lt_of_le : ∀ {m n p : Nat}, m < n → n ≤ p → m < p
   := by
       intros
@@ -109,7 +109,7 @@ theorem trans_lt_of_le_of_lt : ∀ {m n p : Nat}, m ≤ n → n < p → m < p
       apply succ_le_succ
       assumption
       assumption
-      
+
 theorem trans_lt : ∀ {m n p : Nat}, m < n → n < p → m < p
   := by
       intros
@@ -135,9 +135,9 @@ instance : Trans (.<. : Nat → Nat → Prop)
 
 example : 2 < 7 :=
   calc
-    2 ≤ 4 := le.step (le.step le.refl)
-    _ < 5 := lt_succ  
-    _ ≤ 7 := le.step (le.step le.refl)
+    (2 : Nat) ≤ 4 := le.step (le.step le.refl)
+    _         < 5 := lt_succ
+    _         ≤ 7 := le.step (le.step le.refl)
 
 -- Exercise.
 -- Here is a different definition of ≤.
@@ -163,11 +163,11 @@ theorem antisymm : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
         cases n_le_m with
         | z_le_n =>
             rfl
-      | s_le_s _ ih => 
+      | s_le_s _ ih =>
         cases n_le_m with
         | s_le_s n_le_m =>
             rw [ih n_le_m]
-          
+
 
 theorem antisymm' : ∀ {m n : Nat}, le2 m n → le2 n m → m = n
 | _ , _ , z_le_n , z_le_n => rfl
@@ -193,5 +193,3 @@ inductive lt3 : Nat → Nat → Prop where
 -- Exercise. Prove the following.
 --   m ≤ n iff ∃ p, m + p = n
 --   m < n iff ∃ p, p ≠ 0 ∧ m + p = n
-
-
