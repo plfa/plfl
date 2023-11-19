@@ -94,15 +94,18 @@ instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
 example : 2 = (S S Z : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) := rfl
 
 def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
-  μ ƛ ƛ (switch (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
+  μ ƛ ƛ (switch (# 0) (# 1) ((# 3 ⬝ # S S Z ⬝ # Z) +1))
 def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
+
+def one_c : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # S Z ⬝ # Z
+def one_c' : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # 1 ⬝ # 0 
 
 def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
   ƛ (# Z +1)
 def Ch (A : Tp) : Tp := (A ⇒ A) ⇒ A ⇒ A
 def two_c : Γ ⊢ Ch A :=
-  ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
+  ƛ ƛ (# S Z ⬝ (# 1 ⬝ # 0))
 -- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
 def plus_c : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
   ƛ ƛ ƛ ƛ (# S S S Z ⬝ # S Z ⬝ (# S S Z ⬝ # S Z ⬝ # Z))
@@ -335,6 +338,7 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
               match evaluate n M with
                 | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
 
+#check two_plus_two
 #eval two_plus_two
 #eval (evaluate 100 two_plus_two)
 
