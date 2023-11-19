@@ -1,6 +1,7 @@
 namespace Typesig
 
 set_option pp.notation true
+set_option maxRecDepth 1000000
 
 inductive Tp : Type where
 | natural : Tp
@@ -83,7 +84,7 @@ instance : OfNat (Γ ⊢ ℕ) Nat.zero where
 instance [OfNat (Γ ⊢ ℕ) n] : OfNat (Γ ⊢ ℕ) (Nat.succ n) where
   ofNat := term.succ (OfNat.ofNat n)
 
-example : 2 = @o ∅ +1 +1 := rfl
+example : 2 = @term.zero ∅ +1 +1 := rfl
 
 instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
   ofNat := lookup.stop
@@ -99,7 +100,7 @@ def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
 
 def one_c : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # S Z ⬝ # Z
-def one_c' : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # 1 ⬝ # 0 
+def one_c' : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # 1 ⬝ (# 0 : _ ⊢ A)
 
 def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
   ƛ (# Z +1)
@@ -109,6 +110,8 @@ def two_c : Γ ⊢ Ch A :=
 -- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
 def plus_c : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
   ƛ ƛ ƛ ƛ (# S S S Z ⬝ # S Z ⬝ (# S S Z ⬝ # S Z ⬝ # Z))
+def plus_c' : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
+  ƛ ƛ ƛ ƛ ((# 3 : _ ⊢ Ch A) ⬝ # 1 ⬝ ((# 2 : _ ⊢ Ch A) ⬝ # 1 ⬝ # 0))
 -- plusᶜ =  ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ # "m" · # "s" · (# "n" · # "s" · # "z")
 def two : ∅ ⊢ ℕ := two_c ⬝ suc_c ⬝ 0
 
@@ -260,7 +263,7 @@ instance : Trans (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := many_many
 
-example : two ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0 
+example : two ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0
     := xi_app_1 (beta Value.lambda)
 
 example : ((ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0 : ∅ ⊢ ℕ) ~> suc_c ⬝ (suc_c ⬝ 0)
@@ -342,10 +345,12 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
 #eval two_plus_two
 #eval (evaluate 100 two_plus_two)
 
+#reduce two_plus_two
+#reduce (evaluate 100 two_plus_two)
+
 #eval Lean.versionString
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products
 -- Pick suitable notations for introduction and elimination
 -- of products that won't conflict.
-
