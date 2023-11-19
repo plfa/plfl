@@ -342,7 +342,7 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
 #eval two_plus_two
 #eval (evaluate 100 two_plus_two)
 
-
+#eval Lean.versionString
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products
