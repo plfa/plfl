@@ -1,6 +1,9 @@
 namespace Typesig
 
+#eval Lean.versionString
+
 set_option pp.notation true
+set_option hygiene false
 set_option maxRecDepth 1000000
 
 inductive Tp : Type where
@@ -21,54 +24,55 @@ infixl:50 "▷" => TpEnv.extend
 
 example : TpEnv := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
 
+infix:40  "∋" => lookup
+
 inductive lookup : TpEnv → Tp → Type where
   | stop :
        ----------------
-       lookup (Γ ▷ A) A
+       Γ ▷ A ∋ A
   | pop :
-       lookup Γ B
+       Γ ∋ B
        ----------------
-     → lookup (Γ ▷ A) B
+     → Γ ▷ A ∋ B
   deriving Repr
-
-inductive term : TpEnv → Tp → Type where
-  | var :
-        lookup Γ A
-        ----------
-      → term Γ A
-  | lambda :
-        term (Γ ▷ A) B
-        --------------
-      → term Γ (A ⇒ B)
-  | application :
-        term Γ (A ⇒ B)
-      → term Γ A
-        --------
-      → term Γ B
-  | zero :
-        --------
-        term Γ ℕ
-  | succ :
-        term Γ ℕ
-        --------
-      → term Γ ℕ
-  | case :
-        term Γ ℕ
-      → term Γ A
-      → term (Γ ▷ ℕ) A
-        ---------------
-      → term Γ A
-  | mu :
-        term (Γ ▷ A) A
-        --------------
-      → term Γ A
-  deriving Repr
-
-infix:40  "∋" => lookup
-infix:40  "⊢" => term
 
 prefix:90 "S" => lookup.pop
 notation:max "Z" => lookup.stop
+
+infix:40  "⊢" => term
+
+inductive term : TpEnv → Tp → Type where
+  | var :
+        Γ ∋ A
+        ----------
+      → Γ ⊢ A
+  | lambda :
+        Γ ▷ A ⊢ B
+        -----------
+      → Γ ⊢ A ⇒ B
+  | application :
+        Γ ⊢ A ⇒ B
+      → Γ ⊢ A
+        --------
+      → Γ ⊢ B
+  | zero :
+        --------
+        Γ ⊢ ℕ
+  | succ :
+        Γ ⊢ ℕ
+        --------
+      → Γ ⊢ ℕ
+  | case :
+        Γ ⊢ ℕ
+      → Γ ⊢ A
+      → Γ ▷ ℕ ⊢ A
+        ---------------
+      → Γ ⊢ A
+  | mu :
+        Γ ▷ A ⊢ A
+        --------------
+      → Γ ⊢ A
+  deriving Repr
 
 prefix:90 "#" => term.var
 prefix:50 "ƛ" => term.lambda
@@ -341,14 +345,13 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
               match evaluate n M with
                 | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
 
-#check two_plus_two
-#eval two_plus_two
-#eval (evaluate 100 two_plus_two)
+
+-- #eval two_plus_two
+-- #eval (evaluate 100 two_plus_two)
 
 #reduce two_plus_two
 #reduce (evaluate 100 two_plus_two)
 
-#eval Lean.versionString
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products
