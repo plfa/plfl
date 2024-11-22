@@ -4,7 +4,9 @@ namespace Typesig
 
 set_option pp.notation true
 set_option hygiene false
-set_option maxRecDepth 1000000
+set_option maxRecDepth 10000000
+set_option maxHeartbeats 10000000
+
 
 inductive Tp : Type where
 | natural : Tp

@@ -28,6 +28,11 @@ inductive lookup : TpEnv → Tp → Type where
      → lookup (Γ ▷ A) B
   deriving Repr
 
+infix:40  "∋" => lookup
+
+prefix:90 "S" => lookup.pop
+notation:max "Z" => lookup.stop
+
 inductive term : TpEnv → Tp → Type where
   | var :
         lookup Γ A
@@ -61,11 +66,7 @@ inductive term : TpEnv → Tp → Type where
       → term Γ A
   deriving Repr
 
-infix:40  "∋" => lookup
 infix:40  "⊢" => term
-
-prefix:90 "S" => lookup.pop
-notation:max "Z" => lookup.stop
 
 prefix:90 "#" => term.var
 prefix:50 "ƛ" => term.lambda
@@ -187,7 +188,7 @@ infix:20 "~>" => reduce
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type) where
 --   trans := star.two
-  
+
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
       reduce_many M M
@@ -277,4 +278,3 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
 --  https://plfa.inf.ed.ac.uk/More/#products
 -- Pick suitable notations for introduction and elimination
 -- of products that won't conflict.
-
