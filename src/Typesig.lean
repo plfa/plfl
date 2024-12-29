@@ -1,4 +1,12 @@
-namespace DeBruijn
+namespace Typesig
+
+#eval Lean.versionString
+
+set_option pp.notation true
+set_option hygiene false
+set_option maxRecDepth 10000000
+set_option maxHeartbeats 10000000
+
 
 inductive Tp : Type where
 | natural : Tp
@@ -18,54 +26,55 @@ infixl:50 "▷" => TpEnv.extend
 
 example : TpEnv := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
 
+infix:40  "∋" => lookup
+
 inductive lookup : TpEnv → Tp → Type where
   | stop :
        ----------------
-       lookup (Γ ▷ A) A
+       Γ ▷ A ∋ A
   | pop :
-       lookup Γ B
+       Γ ∋ B
        ----------------
-     → lookup (Γ ▷ A) B
+     → Γ ▷ A ∋ B
   deriving Repr
-
-inductive term : TpEnv → Tp → Type where
-  | var :
-        lookup Γ A
-        ----------
-      → term Γ A
-  | lambda :
-        term (Γ ▷ A) B
-        --------------
-      → term Γ (A ⇒ B)
-  | application :
-        term Γ (A ⇒ B)
-      → term Γ A
-        --------
-      → term Γ B
-  | zero :
-        --------
-        term Γ ℕ
-  | succ :
-        term Γ ℕ
-        --------
-      → term Γ ℕ
-  | case :
-        term Γ ℕ
-      → term Γ A
-      → term (Γ ▷ ℕ) A
-        ---------------
-      → term Γ A
-  | mu :
-        term (Γ ▷ A) A
-        --------------
-      → term Γ A
-  deriving Repr
-
-infix:40  "∋" => lookup
-infix:40  "⊢" => term
 
 prefix:90 "S" => lookup.pop
 notation:max "Z" => lookup.stop
+
+infix:40  "⊢" => term
+
+inductive term : TpEnv → Tp → Type where
+  | var :
+        Γ ∋ A
+        ----------
+      → Γ ⊢ A
+  | lambda :
+        Γ ▷ A ⊢ B
+        -----------
+      → Γ ⊢ A ⇒ B
+  | application :
+        Γ ⊢ A ⇒ B
+      → Γ ⊢ A
+        --------
+      → Γ ⊢ B
+  | zero :
+        --------
+        Γ ⊢ ℕ
+  | succ :
+        Γ ⊢ ℕ
+        --------
+      → Γ ⊢ ℕ
+  | case :
+        Γ ⊢ ℕ
+      → Γ ⊢ A
+      → Γ ▷ ℕ ⊢ A
+        ---------------
+      → Γ ⊢ A
+  | mu :
+        Γ ▷ A ⊢ A
+        --------------
+      → Γ ⊢ A
+  deriving Repr
 
 prefix:90 "#" => term.var
 prefix:50 "ƛ" => term.lambda
@@ -75,16 +84,43 @@ postfix:80 "+1" => term.succ
 notation:max "switch" => term.case
 prefix:50 "μ" => term.mu
 
--- instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
---   ofNat := lookup.stop
+instance : OfNat (Γ ⊢ ℕ) Nat.zero where
+  ofNat := term.zero
 
--- instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
---   ofNat := lookup.pop (OfNat.ofNat n)
+instance [OfNat (Γ ⊢ ℕ) n] : OfNat (Γ ⊢ ℕ) (Nat.succ n) where
+  ofNat := term.succ (OfNat.ofNat n)
 
-def two : ∀ {Γ}, Γ ⊢ ℕ := o +1 +1
-def plus : ∀ {Γ}, Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
+example : 2 = @term.zero ∅ +1 +1 := rfl
+
+instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
+  ofNat := lookup.stop
+
+instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
+  ofNat := lookup.pop (OfNat.ofNat n)
+
+example : 2 = (S S Z : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) := rfl
+
+def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   μ ƛ ƛ (switch (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
-def four : ∀ {Γ}, Γ ⊢ ℕ := plus ⬝ two ⬝ two
+def two_plus_two : ∅ ⊢ ℕ :=
+  plus ⬝ 2 ⬝ 2
+
+def one_c : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # S Z ⬝ # Z
+def one_c' : ∅ ⊢ (A ⇒ A) ⇒ A ⇒ A := ƛ ƛ # 1 ⬝ (# 0 : _ ⊢ A)
+
+def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
+  ƛ (# Z +1)
+def Ch (A : Tp) : Tp := (A ⇒ A) ⇒ A ⇒ A
+def two_c : Γ ⊢ Ch A :=
+  ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
+-- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
+def plus_c : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
+  ƛ ƛ ƛ ƛ (# S S S Z ⬝ # S Z ⬝ (# S S Z ⬝ # S Z ⬝ # Z))
+def plus_c' : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
+  ƛ ƛ ƛ ƛ ((# 3 : _ ⊢ Ch A) ⬝ # 1 ⬝ ((# 2 : _ ⊢ Ch A) ⬝ # 1 ⬝ # 0))
+-- plusᶜ =  ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ # "m" · # "s" · (# "n" · # "s" · # "z")
+def two : ∅ ⊢ ℕ := two_c ⬝ suc_c ⬝ 0
+
 
 def rmap (Γ Δ : TpEnv) : Type :=
   ∀ {A : Tp}, (Γ ∋ A) → (Δ ∋ A)
@@ -116,8 +152,8 @@ def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
 def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
 
 def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
-| _ , Z  =>  # Z
-| _ , S x  =>  lift (σ x)
+  | _ , Z  =>  # Z
+  | _ , S x  =>  lift (σ x)
 
 def sub {Γ Δ : TpEnv} (σ : Γ →ˢ Δ) : Γ →ᵗ Δ
   | _ , (# x) => σ x
@@ -135,6 +171,8 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
 
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
   := sub (sigma_0 M) N
+
+example : subst (ƛ (# S Z ⬝ (# S Z ⬝ # Z))) suc_c = (ƛ (suc_c ⬝ (suc_c ⬝ # Z)) : ∅ ⊢ ℕ ⇒ ℕ) := rfl
 
 inductive Value : Γ ⊢ A → Type where
   | lambda :
@@ -172,22 +210,20 @@ infix:20 "~>" => reduce
 --   | none :
 --       star M M
 --   | one :
---         (M ~> N)
---         ----------
---       → star M N
---   | two :
---         star L M
---       → star M N
---         ----------
---       → star L N
-
+--          (M ~> N)
+--          ----------
+--        → star M N
+--    | two :
+--          star L M
+--        → star M N
+--          ----------
+--        → star L N
 -- infix:20 "~>*" => star
-
 -- instance : Trans (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type) where
 --   trans := star.two
-  
+
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
       reduce_many M M
@@ -199,17 +235,59 @@ open reduce_many
 
 infix:20 "~>>"  => reduce_many
 
-theorem reduce_many_trans : (L ~>> M) → (M ~>> N) → (L ~>> N)
-  := by
-      intros L_to_M M_to_N
-      induction L_to_M with
-      | nil =>
-        exact M_to_N
-      | cons _ L_to_P _ ih =>
-        apply cons
-        exact L_to_P
-        apply ih
-        exact M_to_N
+def one_one : (L ~> M) → (M ~> N) → (L ~>> N)
+  | L_to_M, M_to_N => cons _ L_to_M (cons _ M_to_N nil)
+
+def one_many : (L ~> M) → (M ~>> N) → (L ~>> N)
+  | L_to_M, M_to_N => cons _ L_to_M M_to_N
+
+def many_one : (L ~>> M) → (M ~> N) → (L ~>> N)
+  | nil, M_to_N  => cons _ M_to_N nil
+  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_one P_to_M M_to_N)
+
+def many_many : (L ~>> M) → (M ~>> N) → (L ~>> N)
+  | nil, M_to_N  => M_to_N
+  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_many P_to_M M_to_N)
+
+instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
+  trans := one_one
+
+instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
+  trans := one_many
+
+instance : Trans (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
+  trans := many_one
+
+instance : Trans (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
+                 (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
+  trans := many_many
+
+example : two ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0
+    := xi_app_1 (beta Value.lambda)
+
+example : ((ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0 : ∅ ⊢ ℕ) ~> suc_c ⬝ (suc_c ⬝ 0)
+    := beta Value.zero
+
+example : (suc_c ⬝ (suc_c ⬝ 0) : ∅ ⊢ ℕ) ~> suc_c ⬝ 1
+    := xi_app_2 Value.lambda (beta Value.zero)
+
+example : (suc_c ⬝ 1 : ∅ ⊢ ℕ) ~> 2
+    := beta (Value.succ Value.zero)
+
+example : two ~>> 2 :=
+  calc
+    (two_c ⬝ suc_c ⬝ 0 : ∅ ⊢ ℕ)
+      ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0  := xi_app_1 (beta Value.lambda)
+    _ ~> (suc_c ⬝ (suc_c ⬝ 0))            := beta Value.zero
+    _ ~> suc_c ⬝ 1                       := xi_app_2 Value.lambda (beta Value.zero)
+    _ ~> 2                              := beta (Value.succ Value.zero)
 
 inductive Progress : Γ ⊢ A → Type where
   | step :
@@ -269,12 +347,15 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
               match evaluate n M with
                 | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
 
-#eval (evaluate 100 four)
 
+-- #eval two_plus_two
+-- #eval (evaluate 100 two_plus_two)
+
+#reduce two_plus_two
+#reduce (evaluate 100 two_plus_two)
 
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products
 -- Pick suitable notations for introduction and elimination
 -- of products that won't conflict.
-
