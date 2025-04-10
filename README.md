@@ -1,2 +1,1 @@
-# plfl
-Programming Language Foundations in Lean
+# Programming Language Foundations in Lean (plfl)
