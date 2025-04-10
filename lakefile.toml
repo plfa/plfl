@@ -1,0 +1,14 @@
+name = "myprojectname"
+defaultTargets = ["textbook"]
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso"
+rev = "main"
+
+[[lean_lib]]
+name = "DemoTextbook"
+
+[[lean_exe]]
+name = "textbook"
+root = "DemoTextbookMain"
