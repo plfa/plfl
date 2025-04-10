@@ -5,11 +5,11 @@ Author: Philip Wadler
 -/
 
 import VersoManual
-import plfl.Meta.Lean
-import plfl.Papers
+import book.Meta.Lean
+import book.Papers
 
 /-!
-src.Nat: Natural numbers
+book.Nat: Natural numbers
 -/
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
@@ -20,7 +20,7 @@ open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 
 
-open plfl
+open book
 
 set_option pp.rawOnError true
 

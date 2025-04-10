@@ -5,12 +5,12 @@ Author: Philip Wadler
 -/
 
 import VersoManual
-import plfl.Meta.Lean
-import plfl.Papers
-import plfl.Nat
+import book.Meta.Lean
+import book.Papers
+import book.Nat
 
 /-!
-plfl: top-level file for plfl
+book: top-level file for plfl
 -/
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
@@ -21,7 +21,7 @@ open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 
 
-open plfl
+open book
 
 set_option pp.rawOnError true
 

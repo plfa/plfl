@@ -6,7 +6,7 @@ Author: Philip Wadler
 
 import Std.Data.HashMap
 import VersoManual
-import DemoTextbook
+import book
 
 /-
 plflMain: main file for plfl
@@ -17,7 +17,7 @@ open Verso.Genre Manual
 
 open Std (HashMap)
 
-open plfl
+open book
 
 partial def buildExercises (mode : Mode) (logError : String → IO Unit) (cfg : Config) (_state : TraverseState) (text : Part Manual) : IO Unit := do
   let .multi := mode
