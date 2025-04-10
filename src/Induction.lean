@@ -13,6 +13,11 @@ example : 3 + (4 + 5) = (3 + 4) + 5 :=
 theorem add_zero (m : Nat)   : m + zero     = m            := rfl
 theorem add_succ (m n : Nat) : m + (succ n) = succ (m + n) := rfl
 
+-- P p
+
+-- P zero
+-- P p -> P (succ p)
+
 theorem add_assoc : ∀ (m n p : Nat), m + (n + p) = (m + n) + p
   | m , n , zero =>
     calc
@@ -50,7 +55,7 @@ theorem zero_add : ∀ (n : Nat), zero + n = n
     calc
       zero + zero
         = zero              := rfl
-  | succ n => 
+  | succ n =>
     calc
       zero + succ n
         =  succ (zero + n)  := rfl
@@ -81,7 +86,7 @@ theorem comm_add : ∀ (m n : Nat), m + n = n + m
         = succ (m + n)          := by rw [succ_add m n]
       _ = succ (n + m)          := by rw [comm_add m n]
       _ = n + (succ m)          := rfl
-      
+
   
 class Zero (α : Type) where
   zero : α

@@ -4,6 +4,14 @@ inductive Nat where
   | zero : Nat
   | succ : Nat → Nat
 
+inductive Bool where
+  | true : Bool
+  | false : Bool
+
+open Nat
+
+example : Nat := succ (succ zero)
+
 open Nat
 
 def convert : _root_.Nat → Nat
@@ -17,16 +25,6 @@ def add : Nat → Nat → Nat
   | m , zero   => m
   | m , succ n => succ (add m n)
 
--- from lean4/src/Init/Prelude.lean
--- class Add (α : Type) where
---   add : α → α → α
--- class Mul (α : Type) where
---   mul : α → α → α
-
--- from lean4/src/Init/Notation.lean (simplified)
--- infixl:65 " + "   => Add.add
--- infixl:70 " * "   => Mul.mul
-
 instance : Add Nat where
   add := add
 
@@ -39,7 +37,18 @@ example : 3 + 2 = (5 : Nat) :=
     _ =  (5 : Nat)            := rfl
 
 -- a shorter proof
-example : 3 + 2 = 5 := rfl
+example : 3 + 2 = (5 : Nat) := rfl
+
+-- from lean4/src/Init/Prelude.lean
+-- class Add (α : Type) where
+--   add : α → α → α
+-- class Mul (α : Type) where
+--   mul : α → α → α
+
+-- from lean4/src/Init/Notation.lean (simplified)
+-- infixl:65 " + "   => Add.add
+-- infixl:70 " * "   => Mul.mul
+
 
 def mul : Nat → Nat → Nat
   | _ , zero   => zero
@@ -102,11 +111,3 @@ theorem succ_neq_zero (n : Nat) (h : succ n = zero) : False
 
 theorem succ_neq_zero' (n : Nat) (h : succ n = zero) : False
   := by contradiction
-
-
-
-
-
-
-
-

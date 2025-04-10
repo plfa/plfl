@@ -1,3 +1,8 @@
+# DeBruijn
+
+set_option pp.notation true
+set_option maxRecDepth 10000
+
 namespace DeBruijn
 
 inductive Tp : Type where
@@ -187,7 +192,7 @@ infix:20 "~>" => reduce
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type)
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type) where
 --   trans := star.two
-  
+
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
       reduce_many M M
@@ -259,6 +264,8 @@ inductive Steps (L : ∅ ⊢ A) : Type where
 
 open Steps
 
+#check @Progress.step
+
 def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
   match n with
     | Nat.zero => steps nil out_of_gas
@@ -270,6 +277,7 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
                 | Steps.steps M_to_N f => Steps.steps (cons L L_to_M M_to_N) f
 
 #eval (evaluate 100 four)
+#reduce (evaluate 100 four)
 
 
 
@@ -277,4 +285,3 @@ def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
 --  https://plfa.inf.ed.ac.uk/More/#products
 -- Pick suitable notations for introduction and elimination
 -- of products that won't conflict.
-
