@@ -1,5 +1,0 @@
-{"log":
- [{"message":
-   ".> LEAN_PATH=././.lake/packages/subverso/.lake/build/lib/lean:././.lake/packages/MD4Lean/.lake/build/lib/lean:././.lake/packages/verso/.lake/build/lib/lean:././.lake/build/lib/lean /Users/wadler/.elan/toolchains/leanprover--lean4---v4.19.0-rc2/bin/lean ././././Book/Nat.lean -R ./././. -o ././.lake/build/lib/lean/Book/Nat.olean -i ././.lake/build/lib/lean/Book/Nat.ilean -c ././.lake/build/ir/Book/Nat.c --load-dynlib ././.lake/packages/MD4Lean/.lake/build/lib/libleanmd4c.dylib --plugin ././.lake/packages/MD4Lean/.lake/build/lib/libMD4Lean.dylib --json",
-   "level": "trace"}],
- "depHash": "17105282731318912152"}

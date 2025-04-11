@@ -1,5 +1,0 @@
-{"log":
- [{"message":
-   ".> /Users/wadler/.elan/toolchains/leanprover--lean4---v4.19.0-rc2/bin/clang -c -o ././.lake/build/ir/Book/Naturals.c.o.export ././.lake/build/ir/Book/Naturals.c -I /Users/wadler/.elan/toolchains/leanprover--lean4---v4.19.0-rc2/include -fstack-clash-protection -fwrapv -fvisibility=hidden -Wno-unused-command-line-argument --sysroot /Users/wadler/.elan/toolchains/leanprover--lean4---v4.19.0-rc2 -nostdinc -isystem /Users/wadler/.elan/toolchains/leanprover--lean4---v4.19.0-rc2/include/clang -O3 -DNDEBUG -DLEAN_EXPORTING",
-   "level": "trace"}],
- "depHash": "12298319723050336708"}
