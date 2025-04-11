@@ -1,4 +1,4 @@
-name = "PLFL"
+name = "plfl"
 defaultTargets = ["plfl"]
 
 [[require]]
@@ -7,9 +7,9 @@ git = "https://github.com/leanprover/verso"
 rev = "main"
 
 [[lean_lib]]
-name = "book"
+name = "Book"
 
 [[lean_exe]]
 name = "plfl"
-root = "bookMain"
+root = "BookMain"
 

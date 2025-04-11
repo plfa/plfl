@@ -6,10 +6,10 @@ Author: Philip Wadler
 
 import Std.Data.HashMap
 import VersoManual
-import book
+import Book
 
 /-
-plflMain: main file for plfl
+BookMain: main file for plfl
 -/
 
 open Verso Doc
@@ -17,7 +17,7 @@ open Verso.Genre Manual
 
 open Std (HashMap)
 
-open book
+open Book
 
 partial def buildExercises (mode : Mode) (logError : String → IO Unit) (cfg : Config) (_state : TraverseState) (text : Part Manual) : IO Unit := do
   let .multi := mode
@@ -70,4 +70,4 @@ def config : Config where
   emitHtmlMulti := true
   htmlDepth := 2
 
-def main := manualMain (%doc plfl) (extraSteps := [buildExercises]) (config := config)
+def main := manualMain (%doc Book) (extraSteps := [buildExercises]) (config := config)
