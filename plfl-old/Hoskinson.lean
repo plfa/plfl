@@ -6,13 +6,13 @@ namespace Hoskinson
 set_option pp.notation true
 set_option pp.rawOnError true
 set_option hygiene false
-set_option maxRecDepth 1000000
-set_option maxHeartbeats 1000000
+set_option maxRecDepth 10000000
+set_option maxHeartbeats 10000000
 
 inductive Tp : Type where
   | natural : Tp
   | function : Tp → Tp → Tp
-  deriving Repr, Inhabited, DecidableEq
+  deriving Repr, Inhabited, DecidableEq, Lean.ToExpr
 
 notation:max "ℕ" => Tp.natural
 infixr:70 " ⇒ " => Tp.function
@@ -22,7 +22,7 @@ example : Tp := ℕ ⇒ ℕ
 inductive TpEnv : Type where
   | empty : TpEnv
   | extend : TpEnv → Tp → TpEnv
-  deriving Repr, Inhabited, DecidableEq
+  deriving Repr, Inhabited, DecidableEq, Lean.ToExpr
 
 notation:max "∅" => TpEnv.empty
 infixl:50 " ▷ " => TpEnv.extend
@@ -39,7 +39,7 @@ inductive lookup : TpEnv → Tp → Type where
        Γ ∋ B
        ----------------
      → Γ ▷ A ∋ B
-  deriving Repr, DecidableEq
+  deriving Repr, DecidableEq, Lean.ToExpr
 
 prefix:90 "S" => lookup.pop
 notation:max "Z" => lookup.stop
@@ -77,7 +77,7 @@ inductive term : TpEnv → Tp → Type where
         Γ ▷ A ⊢ A
         --------------
       → Γ ⊢ A
-  deriving Repr
+  deriving Repr, DecidableEq, Lean.ToExpr
 
 prefix:90 "# " => term.var
 prefix:50 "ƛ " => term.lambda
@@ -165,6 +165,7 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
   | _ , Z    =>  M
   | _ , S x  =>  # x
 
+@[reducible]
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
   := sub (sigma_0 M) N
 
@@ -177,7 +178,7 @@ inductive Value : Γ ⊢ A → Type where
       Value o
   | succ :
       Value V → Value (V +1)
-  deriving Repr
+  deriving Repr, DecidableEq, Lean.ToExpr
 
 open Value
 
@@ -187,20 +188,20 @@ inductive reduce : Γ ⊢ A → Γ ⊢ A → Type where
   | xi_app_1 :
       L ~> L' → L ⬝ M ~> L' ⬝ M
   | xi_app_2 :
-      Value V → reduce M M' → reduce (V ⬝ M) (V ⬝ M')
+      Value V → M ~> M' → V ⬝ M ~> V ⬝ M'
   | beta :
-      Value W → reduce ((ƛ N) ⬝ W) (subst N W)
+      Value W → (ƛ N) ⬝ W ~> subst N W
   | xi_succ :
-      reduce M M' → reduce (M +1) (M' +1)
+      M ~> M' → M +1 ~> M' +1
   | xi_case :
-      reduce L L' → reduce (casesOn L M N) (casesOn L' M N)
+      L ~> L' → casesOn L M N ~> casesOn L' M N
   | beta_zero :
-      reduce (casesOn o M N) M
+      casesOn o M N ~> M
   | beta_succ :
-      Value V → reduce (casesOn (V +1) M N) (subst N V)
+      Value V → casesOn (V +1) M N ~> subst N V
   | beta_mu :
-      reduce (μ N) (subst N (μ N))
-  deriving Repr
+      μ N ~> subst N (μ N)
+  deriving Repr, Lean.ToExpr
 
 open reduce
 
@@ -227,49 +228,53 @@ infix:30 "~>>"  => reduce_many
 
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
-      M ~>> M
+      ∀ M, M ~>> M
   | cons :
       ∀ L, L ~> M
          → M ~>> N
            -------
          → L ~>> N
-  deriving Repr
+  deriving Repr, Lean.ToExpr
 
 open reduce_many
 
 def one_one : (L ~> M) → (M ~> N) → (L ~>> N)
-  | L_to_M, M_to_N => cons _ L_to_M (cons _ M_to_N nil)
-
-def one_many : (L ~> M) → (M ~>> N) → (L ~>> N)
-  | L_to_M, M_to_N => cons _ L_to_M M_to_N
-
-def many_one : (L ~>> M) → (M ~> N) → (L ~>> N)
-  | nil, M_to_N  => cons _ M_to_N nil
-  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_one P_to_M M_to_N)
-
-def many_many : (L ~>> M) → (M ~>> N) → (L ~>> N)
-  | nil, M_to_N  => M_to_N
-  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_many P_to_M M_to_N)
+  | L_to_M, M_to_N => cons _ L_to_M (cons _ M_to_N (nil _))
 
 instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := one_one
 
+/-
+def one_many : (L ~> M) → (M ~>> N) → (L ~>> N)
+  | L_to_M, M_to_N => cons _ L_to_M M_to_N
+
 instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := one_many
+-/
+
+def many_one : (L ~>> M) → (M ~> N) → (L ~>> N)
+  | nil _, M_to_N  => cons _ M_to_N (nil _)
+  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_one P_to_M M_to_N)
 
 instance : Trans (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := many_one
 
+/-
+def many_many : (L ~>> M) → (M ~>> N) → (L ~>> N)
+  | nil _, M_to_N  => M_to_N
+  | cons _ L_to_P P_to_M , M_to_N => cons _ L_to_P (many_many P_to_M M_to_N)
+
 instance : Trans (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := many_many
+-/
 
 example : two ~> (ƛ (suc_c ⬝ (suc_c ⬝ # Z))) ⬝ 0
     := xi_app_1 (beta lambda)
@@ -298,7 +303,7 @@ inductive Progress : Γ ⊢ A → Type where
       M ~> N → Progress M
   | done :
       Value V → Progress V
-  deriving Repr
+  deriving Repr, Lean.ToExpr
 
 open Progress
 
@@ -331,28 +336,54 @@ def progress : ∀ (M : ∅ ⊢ A), Progress M
 inductive Finished (N : ∅ ⊢ A) : Type where
   | done : Value N → Finished N
   | out_of_gas : Finished N
-  deriving Repr
+  deriving Repr, Lean.ToExpr
 
 open Finished
 
-inductive Steps (L : ∅ ⊢ A) : Type where
-  | steps : (L ~>> N) → Finished N → Steps L
-  deriving Repr
+inductive Evaluation (L : ∅ ⊢ A) : Type where
+  | evaluation : (L ~>> N) → Finished N → Evaluation L
+  deriving Repr, Lean.ToExpr
 
-open Steps
+open Evaluation
 
-def evaluate (n : Nat) (L : ∅ ⊢ A) : Steps L :=
+def evaluate (n : Nat) (L : ∅ ⊢ A) : Evaluation L :=
   match n with
-    | Nat.zero => steps nil out_of_gas
+    | Nat.zero => evaluation (nil _) out_of_gas
     | Nat.succ n =>
         match progress L with
-          | Progress.done v => steps nil (done v)
+          | Progress.done v => evaluation (nil _) (done v)
           | @Progress.step _ _ _ M L_to_M =>
               match evaluate n M with
-                | steps M_to_N f => steps (cons L L_to_M M_to_N) f
+                | evaluation M_to_N f => evaluation (cons L L_to_M M_to_N) f
+
+
+#eval two
+#eval (evaluate 10 two)
+
+example :
+  two =
+    (ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o
+  := by rfl
+  -- good
+
+example :
+  (evaluate 10 two) =
+    evaluation
+      (cons ((ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o) (beta lambda).xi_app_1
+        (cons ((ƛ (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ # Z)) ⬝ o) (beta zero)
+          (cons ((ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o)) (xi_app_2 lambda (beta zero))
+            (cons ((ƛ # Z +1) ⬝ o +1) (beta zero.succ) (nil (o +1 +1))))))
+      (Finished.done zero.succ.succ)
+  := by rfl
+  -- uh oh!
+
+#eval two_plus_two
+#eval (evaluate 100 two_plus_two)
+
 
 -- code below by Wojciech Nawrocki
 
+/-
 open Lean Elab Meta Command in
 elab tk:"#reduce_full" t:term : command => do
   withoutModifyingEnv <| runTermElabM fun _ => Term.withDeclName `_reduce do
@@ -362,6 +393,7 @@ elab tk:"#reduce_full" t:term : command => do
     withTheReader Core.Context (fun ctx => { ctx with options := ctx.options.setBool `smartUnfolding false }) do
       let e ← withTransparency (mode := TransparencyMode.all) <| Meta.reduce e (explicitOnly := false) (skipProofs := false) (skipTypes := false)
       logInfoAt tk e
+-/
 
 open Lean PrettyPrinter Delaborator SubExpr in
 @[delab app.Hoskinson.reduce_many.cons]
@@ -371,10 +403,10 @@ partial def reduce_many.delabCons : Delab := do
   let L ← withNaryArg 4 delab
   let M ← withNaryArg 2 delab
   let r ← withNaryArg 5 delab
-  let steps ← withNaryArg 6 go
+  let rest ← withNaryArg 6 go
   `(calc
     $L ~> $M := $r
-    $steps*
+    $rest*
   )
 where go : DelabM (TSyntaxArray ``calcStep) := do
   let e ← getExpr
@@ -388,63 +420,11 @@ where go : DelabM (TSyntaxArray ``calcStep) := do
   return #[s] ++ rest
 
 
--- #eval two_plus_two
--- #eval (evaluate 100 two_plus_two)
+#eval (evaluate 10 two)
+#eval (evaluate 100 two_plus_two)
 
-#reduce_full two_to_2
+-- set_option pp.notation false
 
-#reduce_full two
-#reduce_full (evaluate 10 two)
-
-/-
-example :
-  (evaluate 10 two)
-      =
-      steps
-        (reduce_many.cons
-          ((ƛƛ#S Z⬝(#S Z⬝#Z))⬝(ƛ#Z+1)⬝o~>(ƛ(ƛ#Z+1)⬝((ƛ#Z+1)⬝#Z))⬝o)
-          ((beta Value.lambda).xi_app_1)
-          (reduce_many.cons
-            ((ƛ#Z+1)⬝((ƛ#Z+1)⬝o))
-            (beta Value.zero)
-            (reduce_many.cons
-              ((ƛ#Z+1)⬝o+1)
-              (xi_app_2 Value.lambda (beta Value.zero))
-              (reduce_many.cons
-                (o+1+1)
-                (beta Value.zero.succ)
-                reduce_many.nil))))
-        (Finished.done Value.zero.succ.succ)
-      :=
-        by rfl
-
-set_option pp.notation false
-
-example :
-  (evaluate 10 two)
-    =
-    steps
-      (calc
-        (ƛƛ#S Z⬝(#S Z⬝#Z))⬝(ƛ#Z+1)⬝o~>(ƛ(ƛ#Z+1)⬝((ƛ#Z+1)⬝#Z))⬝o := (beta Value.lambda).xi_app_1
-        _~>(ƛ#Z+1)⬝((ƛ#Z+1)⬝o) := (beta Value.zero)
-        _~>(ƛ#Z+1)⬝o+1 := (xi_app_2 Value.lambda (beta Value.zero))
-        _~>o+1+1 := beta Value.zero.succ)
-      (Finished.done Value.zero.succ.succ)
-    :=
-      by rfl
-
--/
-
-#reduce_full two_plus_two
-#reduce_full (evaluate 100 two_plus_two)
-
-#check ((μƛƛcasesOn (#Z) (#S Z)
-                    ((#S
-                              S
-                                S
-                                  Z⬝#S
-                              S
-                                Z⬝#Z)+1))⬝o+1+1⬝o+1+1)
 
 -- Exercise. Add products, as detailed in
 --  https://plfa.inf.ed.ac.uk/More/#products

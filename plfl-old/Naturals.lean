@@ -1,3 +1,19 @@
+import Lean
+
+
+
+#check Nat
+@[class] inductive Test : Type where
+
+set_option pp.all true -- in
+#check 1 ≤ 2
+#check 1 + 2
+#check 1 :: 2 :: []
+#check 1 = 2
+
+
+
+
 namespace Naturals
 
 inductive Nat where

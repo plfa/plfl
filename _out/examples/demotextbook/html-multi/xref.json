@@ -1,0 +1,72 @@
+{"Verso.Genre.Manual.section":
+ {"title": "Sections or chapters of the manual",
+  "description": null,
+  "contents":
+  {"sec-ref":
+   [{"id": "sec-ref",
+     "data":
+     {"title": "Section References",
+      "sectionNum": "5.",
+      "context":
+      [{"title": "A Textbook", "number": null},
+       {"title": "Section References", "number": "5"}]},
+     "address": "/Section-References/"}],
+   "index":
+   [{"id": "index",
+     "data":
+     {"title": "Index",
+      "sectionNum": null,
+      "context":
+      [{"title": "A Textbook", "number": null},
+       {"title": "Index", "number": null}]},
+     "address": "/Index/"}]}},
+ "Verso.Genre.Manual.example":
+ {"title": "Verso.Genre.Manual.example",
+  "description": null,
+  "contents":
+  {"x": [{"id": "x", "data": null, "address": "/Lean-Code/Saved-Lean-Code/"}],
+   "NatList.nil": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "NatList.cons": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "NatList": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "MyNats.Nat.zero":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.toNat":
+   [{"id": "MyNats___Nat___toNat",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.succ":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.ofNat":
+   [{"id": "MyNats___Nat___ofNat",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.add":
+   [{"id": "MyNats___Nat___add",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}]}},
+ "Verso.Genre.Manual.doc.tech":
+ {"title": "Terminology",
+  "description": "Definitions of technical terms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic.conv":
+ {"title": "Conversion Tactics",
+  "description": "Tactics for performing targeted rewriting of subterms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic":
+ {"title": "Tactic Documentation",
+  "description": "Detailed descriptions of tactics",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.option":
+ {"title": "Compiler options", "description": null, "contents": {}},
+ "Verso.Genre.Manual.doc":
+ {"title": "Lean constant reference",
+  "description": "Documentation for Lean constants",
+  "contents": {}}}
