@@ -11,7 +11,7 @@ open Verso.Doc Elab
 open Verso.ArgParse
 open Lean
 
-namespace plfl
+namespace Book
 
 block_extension Block.savedLean (file : String) (source : String) where
   data := .arr #[.str file, .str source]

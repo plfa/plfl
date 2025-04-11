@@ -5,12 +5,13 @@ Author: Philip Wadler
 -/
 
 import VersoManual
-import book.Meta.Lean
-import book.Papers
-import book.Nat
+import Book.Meta.Lean
+import Book.Papers
+import Book.Nat
+import Book.Naturals
 
 /-!
-book: top-level file for plfl
+Book: top-level file for plfl
 -/
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
@@ -21,21 +22,22 @@ open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 
 
-open book
+open Book
 
 set_option pp.rawOnError true
 
 
 
-#doc (Manual) "A Textbook" =>
+#doc (Manual) "Programming Language Foundations in Lean" =>
 
 %%%
 authors := ["Philip Wadler"]
 %%%
 
-{index}[example]
-Here's an example project showing how to build a certain kind of textbook with Verso.
-It's a good idea to read the document's source together with the rendered output, because it demonstrates how to use various features.
+{index}[intro]
+This is my inspiring introduction.
+
+{include 1 Book.Naturals}
 
 
 # Lean Code
@@ -57,7 +59,7 @@ Use {lean}`name` to refer to a name that can't be easily elaborated as a term, e
 
 ## Saved Lean Code
 
-The tools in this section come from the Verso namespace `plfl` in the module `plfl.Meta.Lean`.
+The tools in this section come from the Verso namespace `Book` in the module `Book.Meta.Lean`.
 
 The {lean}`savedLean` code block is just like the {lean}`lean` block, except it additionally saves the contents to a file when the book is built.
 The code is saved to the output directory, in the subdirectory `example-code` (by default, this is `_out/example-code`), with its filename being that of the file in which it is edited.
@@ -88,7 +90,7 @@ Expected error messages must be indicated explicitly:
 unknown identifier 'y'
 ```
 
-{include 1 plfl.Nat}
+{include 1 Book.Nat}
 
 # Notes
 
