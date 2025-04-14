@@ -33,11 +33,11 @@ infix:40  " ∋ " => lookup
 
 inductive lookup : TpEnv → Tp → Type where
   | stop :
-       ----------------
+       ---------
        Γ ▷ A ∋ A
   | pop :
        Γ ∋ B
-       ----------------
+       ---------
      → Γ ▷ A ∋ B
   deriving Repr, DecidableEq, Lean.ToExpr
 
@@ -93,19 +93,36 @@ instance : OfNat (Γ ⊢ ℕ) Nat.zero where
 instance [OfNat (Γ ⊢ ℕ) n] : OfNat (Γ ⊢ ℕ) (Nat.succ n) where
   ofNat := (OfNat.ofNat n) +1
 
-example : 2 = (o +1 +1 : ∅ ⊢ ℕ) := rfl
+example : (2  : ∅ ⊢ ℕ) = o +1 +1 := rfl
 
+/-
 instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
   ofNat := Z
 
 instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
   ofNat := S (OfNat.ofNat n)
 
-example : 2 = (S S Z : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) := rfl
+example : (2 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S S Z := rfl
+-/
+
+class OfNatLookup (Γ : TpEnv) (n : Nat) (A : outParam Tp) where
+  ofNatLookup : Γ ∋ A
+
+instance : OfNatLookup (Γ ▷ A) Nat.zero A where
+  ofNatLookup := Z
+
+instance [OfNatLookup Γ n B] : OfNatLookup (Γ ▷ A) (Nat.succ n) B where
+  ofNatLookup := S (OfNatLookup.ofNatLookup n)
+
+instance [OfNatLookup Γ n A] : OfNat (Γ ∋ A) n where
+  ofNat := OfNatLookup.ofNatLookup n
+
+example : (1 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S Z := rfl
+
 
 def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   -- μ ƛ ƛ (casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
-  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # S S Z ⬝ # Z) +1))
+  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # 2 ⬝ # 0) +1))
 def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
 

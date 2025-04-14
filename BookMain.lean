@@ -69,5 +69,7 @@ def config : Config where
   emitHtmlSingle := false
   emitHtmlMulti := true
   htmlDepth := 2
+  extraFiles := [("static", "static")]
+  extraCss := ["/static/plfl.css"]
 
 def main := manualMain (%doc Book) (extraSteps := [buildExercises]) (config := config)
