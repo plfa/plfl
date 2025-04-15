@@ -114,15 +114,17 @@ instance : OfNatLookup (Γ ▷ A) Nat.zero A where
 instance [OfNatLookup Γ n B] : OfNatLookup (Γ ▷ A) (Nat.succ n) B where
   ofNatLookup := S (OfNatLookup.ofNatLookup n)
 
-instance [OfNatLookup Γ n A] : OfNat (Γ ∋ A) n where
-  ofNat := OfNatLookup.ofNatLookup n
+-- instance [OfNatLookup Γ n A] : OfNat (Γ ∋ A) n where
+--   ofNat := OfNatLookup.ofNatLookup n
+instance : Coe Nat (Γ ∋ A) where
+  coe n := OfNatLookup.ofNatLookup n
 
-example : (1 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S Z := rfl
-
+abbrev one : Nat := 1
+example : (one : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S Z := rfl
 
 def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   -- μ ƛ ƛ (casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
-  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # 2 ⬝ # 0) +1))
+  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # S S Z ⬝ # Z) +1))
 def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
 
@@ -182,7 +184,7 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
   | _ , Z    =>  M
   | _ , S x  =>  # x
 
-@[reducible]
+-- @[reducible]
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
   := sub (sigma_0 M) N
 
@@ -320,11 +322,11 @@ inductive Progress : Γ ⊢ A → Type where
       M ~> N → Progress M
   | done :
       Value V → Progress V
-  deriving Repr, Lean.ToExpr
+  -- deriving Repr, Lean.ToExpr
 
 open Progress
 
-def progress : ∀ (M : ∅ ⊢ A), Progress M
+abbrev progress : ∀ (M : ∅ ⊢ A), Progress M
   | (# x) => by contradiction
   | (ƛ N) => done lambda
   | (L ⬝ M) =>
@@ -363,7 +365,7 @@ inductive Evaluation (L : ∅ ⊢ A) : Type where
 
 open Evaluation
 
-def evaluate (n : Nat) (L : ∅ ⊢ A) : Evaluation L :=
+abbrev evaluate (n : Nat) (L : ∅ ⊢ A) : Evaluation L :=
   match n with
     | Nat.zero => evaluation (nil _) out_of_gas
     | Nat.succ n =>
@@ -381,22 +383,96 @@ example :
   two =
     (ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o
   := by rfl
-  -- good
 
 example :
   (evaluate 10 two) =
-    evaluation
-      (cons ((ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o) (beta lambda).xi_app_1
-        (cons ((ƛ (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ # Z)) ⬝ o) (beta zero)
-          (cons ((ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o)) (xi_app_2 lambda (beta zero))
-            (cons ((ƛ # Z +1) ⬝ o +1) (beta zero.succ) (nil (o +1 +1))))))
-      (Finished.done zero.succ.succ)
-  := by rfl
-  -- uh oh!
+    (evaluation
+          (cons ((ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o) (beta lambda).xi_app_1
+            (cons ((ƛ (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ # Z)) ⬝ o) (beta zero)
+              (cons ((ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o)) (xi_app_2 lambda (beta zero))
+                (cons ((ƛ # Z +1) ⬝ o +1) (beta zero.succ) (nil (o +1 +1))))))
+          (Finished.done zero.succ.succ))
+
+  := by
+    rfl
 
 #eval two_plus_two
 #eval (evaluate 100 two_plus_two)
 
+example :
+  two_plus_two =
+    (μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ o +1 +1
+  := by
+    rfl
+
+example :
+  evaluate 100 two_plus_two =
+    evaluation
+    (cons ((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ o +1 +1) beta_mu.xi_app_1.xi_app_1
+      (cons
+        ((ƛ
+              ƛ
+                casesOn (# Z) (# S Z)
+                  (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ # S S Z ⬝ # Z) +1)) ⬝
+            o +1 +1 ⬝
+          o +1 +1)
+        (beta zero.succ.succ).xi_app_1
+        (cons
+          ((ƛ
+              casesOn (# Z) (o +1 +1)
+                (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ # Z) +1)) ⬝
+            o +1 +1)
+          (beta zero.succ.succ)
+          (cons
+            (casesOn (o +1 +1) (o +1 +1)
+              (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ # Z) +1))
+            (beta_succ zero.succ)
+            (cons (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ o +1) +1)
+              beta_mu.xi_app_1.xi_app_1.xi_succ
+              (cons
+                (((ƛ
+                        ƛ
+                          casesOn (# Z) (# S Z)
+                            (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ # S S Z ⬝ # Z) +1)) ⬝
+                      o +1 +1 ⬝
+                    o +1) +1)
+                (beta zero.succ.succ).xi_app_1.xi_succ
+                (cons
+                  (((ƛ
+                        casesOn (# Z) (o +1 +1)
+                          (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ # Z) +1)) ⬝
+                      o +1) +1)
+                  (beta zero.succ).xi_succ
+                  (cons
+                    (casesOn (o +1) (o +1 +1)
+                        (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ # Z) +1) +1)
+                    (beta_succ zero).xi_succ
+                    (cons (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝ o) +1 +1)
+                      beta_mu.xi_app_1.xi_app_1.xi_succ.xi_succ
+                      (cons
+                        (((ƛ
+                                  ƛ
+                                    casesOn (# Z) (# S Z)
+                                      (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ # S S Z ⬝
+                                          # Z) +1)) ⬝
+                                o +1 +1 ⬝
+                              o) +1 +1)
+                        (beta zero.succ.succ).xi_app_1.xi_succ.xi_succ
+                        (cons
+                          (((ƛ
+                                  casesOn (# Z) (o +1 +1)
+                                    (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝
+                                        # Z) +1)) ⬝
+                                o) +1 +1)
+                          (beta zero).xi_succ.xi_succ
+                          (cons
+                            (casesOn o (o +1 +1)
+                                  (((μ ƛ ƛ casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1)) ⬝ o +1 +1 ⬝
+                                      # Z) +1) +1 +1)
+                            beta_zero.xi_succ.xi_succ (nil (o +1 +1 +1 +1))))))))))))))
+    (Finished.done zero.succ.succ.succ.succ)
+  := by
+    rfl
 
 -- code below by Wojciech Nawrocki
 
@@ -439,6 +515,20 @@ where go : DelabM (TSyntaxArray ``calcStep) := do
 
 #eval (evaluate 10 two)
 #eval (evaluate 100 two_plus_two)
+
+example :
+  evaluate 10 two =
+    evaluation
+      (calc
+        (ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o~>(ƛ (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ # Z)) ⬝ o := (beta lambda).xi_app_1
+        _~>(ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o) := (beta zero)
+        _~>(ƛ # Z +1) ⬝ o +1 := (xi_app_2 lambda (beta zero))
+        _~>o +1 +1 := beta zero.succ)
+      (Finished.done zero.succ.succ)
+  := by
+    rfl
+
+
 
 -- set_option pp.notation false
 

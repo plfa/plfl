@@ -55,12 +55,66 @@ And here is the definition in Lean.
 ```savedLean
 namespace MyNat
 
-inductive Nat where
-  | zero
-  | succ : Nat → Nat
+inductive ℕ where
+  | zero : ℕ
+  | succ (n : ℕ) : ℕ
+
+end MyNat
 ```
 That puts it in a private namespace. We don't need to import it,
 because it is in the standard prelude.
+
+Define numerals for naturals.
+```savedLean
+namespace MyNat
+
+def ofNat : _root_.Nat → ℕ
+  | 0 => .zero
+  | n + 1 => .succ (ofNat n)
+
+instance : OfNat ℕ n where
+  ofNat := ofNat n
+
+end MyNat
+```
+
+Now we define addition in the same namespace.
+```savedLean
+namespace MyNat
+
+abbrev add : ℕ → ℕ → ℕ
+  | m, .zero => m
+  | m, .succ n => .succ (add m n)
+
+instance : Add ℕ where
+  add := add
+
+example : 2 + 2 = (4 : ℕ) := by rfl
+
+end MyNat
+```
+
+Here is an example of a computation.
+```savedLean name:=myOut
+#eval 2 + 2
+```
+It produces the following result.
+```leanOutput myOut
+4
+```
+
+Here is an example of an error
+```savedLean name:=myErr error:=true
+#eval 2 + foo
+```
+It produces the following error message.
+```leanOutput myErr
+unknown identifier 'foo'
+```
+
+
+
+
 
 
 

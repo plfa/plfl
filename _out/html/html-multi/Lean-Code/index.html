@@ -901,36 +901,56 @@ window.onload = () => {
             <div class="split-toc">
               <div class="title">
                 <label for="--verso-manual-toc-Programming-Language-Foundations-in-Lean--Lean-Code" class="toggle-split-toc"><input type="checkbox" class="toggle-split-toc" id="--verso-manual-toc-Programming-Language-Foundations-in-Lean--Lean-Code" checked="checked"></label><span class="number">2.</span> <span class="current"><a href="Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code">Lean Code</a></span></div>
-              <table><tr class="numbered"><td class="num">2.1.</td><td><a href="Lean-Code/Saved-Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code">Saved Lean Code</a></td></tr></table></div>
+              <table><tr class="numbered"><td class="num">2.1.</td><td><a href="Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code">Saved Lean Code</a></td></tr></table></div>
             </div>
           </div>
         <div class="last"></div>
         </nav>
       <main><div class="content-wrapper">
           <nav class="prev-next-buttons">
-            <a class="local-button active" href="Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/#Programming-Language-Foundations-in-Lean--Naturals___-Natural-numbers--The-naturals-are-an-inductive-datatype" rel="prev" title="1.1. The naturals are an inductive datatype"><span class="arrow">←</span><span class="where">1.1. The naturals are an inductive datatype</span></a><a class="local-button active" href="Lean-Code/Saved-Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code" rel="next" title="2.1. Saved Lean Code"><span class="where">2.1. Saved Lean Code</span><span class="arrow">→</span></a></nav>
+            <a class="local-button active" href="Naturals___-Natural-numbers/#Programming-Language-Foundations-in-Lean--Naturals___-Natural-numbers" rel="prev" title="1. Naturals: Natural numbers"><span class="arrow">←</span><span class="where">1. Naturals: Natural numbers</span></a><a class="local-button active" href="The-Natural-Numbers/#Programming-Language-Foundations-in-Lean--The-Natural-Numbers" rel="next" title="3. The Natural Numbers"><span class="where">3. The Natural Numbers</span><span class="arrow">→</span></a></nav>
           <section>
             <h1>
               2. Lean Code</h1>
             <p>
               The tools in this section come from the Verso namespace <code>Verso.Genre.Manual.InlineLean</code>.</p>
             <p>
-              The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.lean" data-verso-hover="5">lean</span></code> code block allows Lean code to be included in the text.
+              The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.lean" data-verso-hover="20">lean</span></code> code block allows Lean code to be included in the text.
 It is elaborated in the context of the text's elaboration, but in a separate section scope (so the set of variables and opened namespaces can be controlled).</p>
-            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.inductive-1118" data-verso-hover="1">inductive</span> <span class="const token" data-binding="const-NatList" data-verso-hover="6" id="NatList">NatList</span> <span class="keyword token" data-binding="kw-occ-null-1136">where</span>
-  <span class="unknown token" data-binding="">|</span> <span class="const token" data-binding="const-NatList.nil" data-verso-hover="7" id="NatList">nil</span>
-  <span class="unknown token" data-binding="">|</span> <span class="const token" data-binding="const-NatList.cons" data-verso-hover="8" id="NatList">cons</span> <span class="unknown token" data-binding="">:</span> <span class="const token" data-binding="const-Nat" data-verso-hover="9">Nat</span> <span class="unknown token" data-binding="">→</span> <a href="Lean-Code/#NatList"><span class="const token" data-binding="const-NatList" data-verso-hover="6">NatList</span></a> <span class="unknown token" data-binding="">→</span> <a href="Lean-Code/#NatList"><span class="const token" data-binding="const-NatList" data-verso-hover="6">NatList</span></a>
+            <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.inductive-1118" data-verso-hover="1">inductive</span> <span class="const token" data-binding="const-NatList" data-verso-hover="21" id="NatList">NatList</span> <span class="keyword token" data-binding="kw-occ-null-1136">where</span>
+  <span class="unknown token" data-binding="">|</span> <span class="const token" data-binding="const-NatList.nil" data-verso-hover="22" id="NatList">nil</span>
+  <span class="unknown token" data-binding="">|</span> <span class="const token" data-binding="const-NatList.cons" data-verso-hover="23" id="NatList">cons</span> <span class="unknown token" data-binding="">:</span> <span class="const token" data-binding="const-Nat" data-verso-hover="8">Nat</span> <span class="unknown token" data-binding="">→</span> <a href="Lean-Code/#NatList"><span class="const token" data-binding="const-NatList" data-verso-hover="21">NatList</span></a> <span class="unknown token" data-binding="">→</span> <a href="Lean-Code/#NatList"><span class="const token" data-binding="const-NatList" data-verso-hover="21">NatList</span></a>
 <span class="unknown token" data-binding=""></span></code><p>
-              Use the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.leanSection" data-verso-hover="10">leanSection</span></code> directive to create a Lean section that delimits scope changes.
-The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.lean" data-verso-hover="5">lean</span></code> role allows Lean terms to be included as inline elements in paragraphs.
-Use <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.name" data-verso-hover="11">name</span></code> to refer to a name that can't be easily elaborated as a term, e.g. due to implicit parameters.</p>
-            <ol class="section-toc">
-              <li>
-                <a href="Lean-Code/Saved-Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code"><span class="number">2.1.</span> Saved Lean Code</a></li>
-              </ol>
+              Use the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.leanSection" data-verso-hover="24">leanSection</span></code> directive to create a Lean section that delimits scope changes.
+The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.lean" data-verso-hover="20">lean</span></code> role allows Lean terms to be included as inline elements in paragraphs.
+Use <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.name" data-verso-hover="25">name</span></code> to refer to a name that can't be easily elaborated as a term, e.g. due to implicit parameters.</p>
+            <section>
+              <h2 id="Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code">
+                2.1. Saved Lean Code</h2>
+              <p>
+                The tools in this section come from the Verso namespace <code>Book</code> in the module <code>Book.Meta.Lean</code>.</p>
+              <p>
+                The <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Book.savedLean" data-verso-hover="26">savedLean</span></code> code block is just like the <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.lean" data-verso-hover="20">lean</span></code> block, except it additionally saves the contents to a file when the book is built.
+The code is saved to the output directory, in the subdirectory <code>example-code</code> (by default, this is <code>_out/example-code</code>), with its filename being that of the file in which it is edited.
+Use <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Book.savedImport" data-verso-hover="27">savedImport</span></code> to save code for the file header.</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.definition-2063">def</span> <span class="const token" data-binding="const-x" data-verso-hover="28" id="x">x</span> <span class="unknown token" data-binding="">:</span> <span class="const token" data-binding="const-Nat" data-verso-hover="8">Nat</span> <span class="unknown token" data-binding="">:=</span> <span class="typed token" data-binding="" data-verso-hover="9">15</span>
+<span class="unknown token" data-binding=""></span></code><p>
+                When named, the code block's output is saved.
+It can be both checked and included in the document using <code class="hl lean inline" data-lean-context="examples"><span class="const token" data-binding="const-Verso.Genre.Manual.InlineLean.leanOutput" data-verso-hover="29">leanOutput</span></code>:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="has-info info"><span class="hover-container"><span class="hover-info messages"><code class="message info">15</code></span></span><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-2239" data-verso-hover="19">#eval</span></span> <a href="Lean-Code/#x"><span class="const token" data-binding="const-x" data-verso-hover="28">x</span></a>
+<span class="unknown token" data-binding=""></span></code><div class="information">
+                <pre>15
+</pre></div>
+              <p>
+                Expected error messages must be indicated explicitly:</p>
+              <code class="hl lean block" data-lean-context="examples"><span class="keyword token" data-binding="kw-occ-Lean.Parser.Command.eval-2371" data-verso-hover="19">#eval</span> <span class="has-info error"><span class="hover-container"><span class="hover-info messages"><code class="message error">unknown identifier 'y'</code></span></span><span class="unknown token" data-binding="">y</span></span>
+<span class="unknown token" data-binding=""></span></code><div class="error">
+                <pre>unknown identifier 'y'
+</pre></div>
+              </section>
             </section>
           <nav class="prev-next-buttons">
-            <a class="local-button active" href="Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/#Programming-Language-Foundations-in-Lean--Naturals___-Natural-numbers--The-naturals-are-an-inductive-datatype" rel="prev" title="1.1. The naturals are an inductive datatype"><span class="arrow">←</span><span class="where">1.1. The naturals are an inductive datatype</span></a><a class="local-button active" href="Lean-Code/Saved-Lean-Code/#Programming-Language-Foundations-in-Lean--Lean-Code--Saved-Lean-Code" rel="next" title="2.1. Saved Lean Code"><span class="where">2.1. Saved Lean Code</span><span class="arrow">→</span></a></nav>
+            <a class="local-button active" href="Naturals___-Natural-numbers/#Programming-Language-Foundations-in-Lean--Naturals___-Natural-numbers" rel="prev" title="1. Naturals: Natural numbers"><span class="arrow">←</span><span class="where">1. Naturals: Natural numbers</span></a><a class="local-button active" href="The-Natural-Numbers/#Programming-Language-Foundations-in-Lean--The-Natural-Numbers" rel="next" title="3. The Natural Numbers"><span class="where">3. The Natural Numbers</span><span class="arrow">→</span></a></nav>
           </div>
         </main></div>
     </body>

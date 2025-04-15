@@ -712,6 +712,162 @@ body {
       width: auto;
     }
     </style><script>
+      let xref = {"Verso.Genre.Manual.section":
+ {"title": "Sections or chapters of the manual",
+  "description": null,
+  "contents":
+  {"sec-ref":
+   [{"id": "sec-ref",
+     "data":
+     {"title": "Section References",
+      "sectionNum": "6.",
+      "context":
+      [{"title": "Programming Language Foundations in Lean", "number": null},
+       {"title": "Section References", "number": "6"}]},
+     "address": "/Section-References/"}],
+   "index":
+   [{"id": "index",
+     "data":
+     {"title": "Index",
+      "sectionNum": null,
+      "context":
+      [{"title": "Programming Language Foundations in Lean", "number": null},
+       {"title": "Index", "number": null}]},
+     "address": "/Index/"}]}},
+ "Verso.Genre.Manual.example":
+ {"title": "Verso.Genre.Manual.example",
+  "description": null,
+  "contents":
+  {"x": [{"id": "x", "data": null, "address": "/Lean-Code/"}],
+   "NatList.nil": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "NatList.cons": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "NatList": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
+   "MyNats.Nat.zero":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.toNat":
+   [{"id": "MyNats___Nat___toNat",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.succ":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.ofNat":
+   [{"id": "MyNats___Nat___ofNat",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat.add":
+   [{"id": "MyNats___Nat___add",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNats.Nat":
+   [{"id": "MyNats___Nat___zero",
+     "data": null,
+     "address": "/The-Natural-Numbers/"}],
+   "MyNat.ℕ.zero":
+   [{"id": "MyNat_________succ",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ℕ.succ":
+   [{"id": "MyNat_________succ",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ℕ":
+   [{"id": "MyNat_________succ",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ofNat":
+   [{"id": "MyNat___ofNat",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.add":
+   [{"id": "MyNat___add",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}]}},
+ "Verso.Genre.Manual.doc.tech":
+ {"title": "Terminology",
+  "description": "Definitions of technical terms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic.conv":
+ {"title": "Conversion Tactics",
+  "description": "Tactics for performing targeted rewriting of subterms",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.tactic":
+ {"title": "Tactic Documentation",
+  "description": "Detailed descriptions of tactics",
+  "contents": {}},
+ "Verso.Genre.Manual.doc.option":
+ {"title": "Compiler options", "description": null, "contents": {}},
+ "Verso.Genre.Manual.doc":
+ {"title": "Lean constant reference",
+  "description": "Documentation for Lean constants",
+  "contents": {}}};
+let params = new URLSearchParams(document.location.search);
+let domains = params.getAll("domain");
+let name = params.get("name");
+console.log("Domains: " + domains);
+console.log("name: " + name);
+if(name) {
+    let siteRoot = typeof __versoSiteRoot !== 'undefined' ? __versoSiteRoot : "";
+    let options = [];
+    if (domains && domains.length > 0) {
+        for (const i in domains) {
+            let domain = domains[i];
+            console.log('Considering domain ' + domain);
+            if (xref.hasOwnProperty(domain)) {
+                console.log('Found domain ' + domain);
+                let opts = xref[domain];
+                if (opts['contents'].hasOwnProperty(name)) {
+                    options = opts['contents'][name].map(x => Object.assign(x, {'domain': domain}));
+                }
+            }
+        }
+    } else {
+        for (const [dom, opts] of Object.entries(xref)) {
+            if (opts['contents'].hasOwnProperty(name)) {
+                for (const i of opts['contents'][name]) {
+                    options.push(Object.assign(i, {'domain': dom}));
+                }
+            }
+        }
+    }
+
+    if (options.length == 0) {
+        addEventListener('DOMContentLoaded', event => {
+            document.title = "Not found: '" + name + "'";
+            document.querySelector("#title").innerHTML = "Not found: name '" + name + "'";
+            let allDomains = [];
+            for (const d in xref) {
+                allDomains.push(d);
+            }
+            if (domains.length < 1) {
+                domains = allDomains;
+            }
+            document.querySelector("#message").innerHTML = "<p>Searched domains:</p>" + "<ul>" + domains.map(x => "<li><code>" + x + "</code>: " + xref[x]['title'] + "</li>\n").join('') + "</ul>";
+        });
+    } else if (options.length == 1) {
+        let addr = siteRoot + options[0]['address'] + "#" + options[0]['id'];
+        window.location.replace(addr);
+    } else {
+        addEventListener('DOMContentLoaded', event => {
+            document.title = "Ambiguous: '" + name + "'";
+            document.querySelector("#title").innerHTML = "Ambiguous: name '" + name + "'";
+            document.querySelector("#message").innerHTML = "<p>Options:</p><ul>" +
+                options.map((x, idx) => '<li><p><a href="' + siteRoot + x['address'] + '#' + x['id'] + '">From ' + xref[x['domain']]['title'] + '</a></p></li>').join('\n') +
+                "</ul>";
+        });
+    }
+} else {
+    addEventListener('DOMContentLoaded', event => {
+        document.title = "No name provided";
+        document.querySelector("#title").innerHTML = "No name provided";
+        document.querySelector("#message").innerHTML = "<p>This page expects a 'name' query parameter, along with documentation domains.</p>";
+    });
+}
+</script>
+    <script>
       
 window.onload = () => {
 
@@ -875,157 +1031,6 @@ window.onload = () => {
         }
       });
   });
-}
-</script>
-    <script>
-      let xref = {"Verso.Genre.Manual.section":
- {"title": "Sections or chapters of the manual",
-  "description": null,
-  "contents":
-  {"sec-ref":
-   [{"id": "sec-ref",
-     "data":
-     {"title": "Section References",
-      "sectionNum": "6.",
-      "context":
-      [{"title": "Programming Language Foundations in Lean", "number": null},
-       {"title": "Section References", "number": "6"}]},
-     "address": "/Section-References/"}],
-   "index":
-   [{"id": "index",
-     "data":
-     {"title": "Index",
-      "sectionNum": null,
-      "context":
-      [{"title": "Programming Language Foundations in Lean", "number": null},
-       {"title": "Index", "number": null}]},
-     "address": "/Index/"}]}},
- "Verso.Genre.Manual.example":
- {"title": "Verso.Genre.Manual.example",
-  "description": null,
-  "contents":
-  {"x": [{"id": "x", "data": null, "address": "/Lean-Code/Saved-Lean-Code/"}],
-   "NatList.nil": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
-   "NatList.cons": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
-   "NatList": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
-   "MyNats.Nat.zero":
-   [{"id": "MyNats___Nat___zero",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNats.Nat.toNat":
-   [{"id": "MyNats___Nat___toNat",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNats.Nat.succ":
-   [{"id": "MyNats___Nat___zero",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNats.Nat.ofNat":
-   [{"id": "MyNats___Nat___ofNat",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNats.Nat.add":
-   [{"id": "MyNats___Nat___add",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNats.Nat":
-   [{"id": "MyNats___Nat___zero",
-     "data": null,
-     "address": "/The-Natural-Numbers/"}],
-   "MyNat.Nat.zero":
-   [{"id": "MyNat___Nat___succ",
-     "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}],
-   "MyNat.Nat.succ":
-   [{"id": "MyNat___Nat___succ",
-     "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}],
-   "MyNat.Nat":
-   [{"id": "MyNat___Nat___succ",
-     "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}]}},
- "Verso.Genre.Manual.doc.tech":
- {"title": "Terminology",
-  "description": "Definitions of technical terms",
-  "contents": {}},
- "Verso.Genre.Manual.doc.tactic.conv":
- {"title": "Conversion Tactics",
-  "description": "Tactics for performing targeted rewriting of subterms",
-  "contents": {}},
- "Verso.Genre.Manual.doc.tactic":
- {"title": "Tactic Documentation",
-  "description": "Detailed descriptions of tactics",
-  "contents": {}},
- "Verso.Genre.Manual.doc.option":
- {"title": "Compiler options", "description": null, "contents": {}},
- "Verso.Genre.Manual.doc":
- {"title": "Lean constant reference",
-  "description": "Documentation for Lean constants",
-  "contents": {}}};
-let params = new URLSearchParams(document.location.search);
-let domains = params.getAll("domain");
-let name = params.get("name");
-console.log("Domains: " + domains);
-console.log("name: " + name);
-if(name) {
-    let siteRoot = typeof __versoSiteRoot !== 'undefined' ? __versoSiteRoot : "";
-    let options = [];
-    if (domains && domains.length > 0) {
-        for (const i in domains) {
-            let domain = domains[i];
-            console.log('Considering domain ' + domain);
-            if (xref.hasOwnProperty(domain)) {
-                console.log('Found domain ' + domain);
-                let opts = xref[domain];
-                if (opts['contents'].hasOwnProperty(name)) {
-                    options = opts['contents'][name].map(x => Object.assign(x, {'domain': domain}));
-                }
-            }
-        }
-    } else {
-        for (const [dom, opts] of Object.entries(xref)) {
-            if (opts['contents'].hasOwnProperty(name)) {
-                for (const i of opts['contents'][name]) {
-                    options.push(Object.assign(i, {'domain': dom}));
-                }
-            }
-        }
-    }
-
-    if (options.length == 0) {
-        addEventListener('DOMContentLoaded', event => {
-            document.title = "Not found: '" + name + "'";
-            document.querySelector("#title").innerHTML = "Not found: name '" + name + "'";
-            let allDomains = [];
-            for (const d in xref) {
-                allDomains.push(d);
-            }
-            if (domains.length < 1) {
-                domains = allDomains;
-            }
-            document.querySelector("#message").innerHTML = "<p>Searched domains:</p>" + "<ul>" + domains.map(x => "<li><code>" + x + "</code>: " + xref[x]['title'] + "</li>\n").join('') + "</ul>";
-        });
-    } else if (options.length == 1) {
-        let addr = siteRoot + options[0]['address'] + "#" + options[0]['id'];
-        window.location.replace(addr);
-    } else {
-        addEventListener('DOMContentLoaded', event => {
-            document.title = "Ambiguous: '" + name + "'";
-            document.querySelector("#title").innerHTML = "Ambiguous: name '" + name + "'";
-            document.querySelector("#message").innerHTML = "<p>Options:</p><ul>" +
-                options.map((x, idx) => '<li><p><a href="' + siteRoot + x['address'] + '#' + x['id'] + '">From ' + xref[x['domain']]['title'] + '</a></p></li>').join('\n') +
-                "</ul>";
-        });
-    }
-} else {
-    addEventListener('DOMContentLoaded', event => {
-        document.title = "No name provided";
-        document.querySelector("#title").innerHTML = "No name provided";
-        document.querySelector("#message").innerHTML = "<p>This page expects a 'name' query parameter, along with documentation domains.</p>";
-    });
 }
 </script>
     </head>

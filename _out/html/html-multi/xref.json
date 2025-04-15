@@ -24,7 +24,7 @@
  {"title": "Verso.Genre.Manual.example",
   "description": null,
   "contents":
-  {"x": [{"id": "x", "data": null, "address": "/Lean-Code/Saved-Lean-Code/"}],
+  {"x": [{"id": "x", "data": null, "address": "/Lean-Code/"}],
    "NatList.nil": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
    "NatList.cons": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
    "NatList": [{"id": "NatList", "data": null, "address": "/Lean-Code/"}],
@@ -52,21 +52,26 @@
    [{"id": "MyNats___Nat___zero",
      "data": null,
      "address": "/The-Natural-Numbers/"}],
-   "MyNat.Nat.zero":
-   [{"id": "MyNat___Nat___succ",
+   "MyNat.ℕ.zero":
+   [{"id": "MyNat_________succ",
      "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}],
-   "MyNat.Nat.succ":
-   [{"id": "MyNat___Nat___succ",
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ℕ.succ":
+   [{"id": "MyNat_________succ",
      "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}],
-   "MyNat.Nat":
-   [{"id": "MyNat___Nat___succ",
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ℕ":
+   [{"id": "MyNat_________succ",
      "data": null,
-     "address":
-     "/Naturals___-Natural-numbers/The-naturals-are-an-inductive-datatype/"}]}},
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.ofNat":
+   [{"id": "MyNat___ofNat",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}],
+   "MyNat.add":
+   [{"id": "MyNat___add",
+     "data": null,
+     "address": "/Naturals___-Natural-numbers/"}]}},
  "Verso.Genre.Manual.doc.tech":
  {"title": "Terminology",
   "description": "Definitions of technical terms",

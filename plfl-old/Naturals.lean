@@ -1,7 +1,36 @@
-import Lean
+/-
+Copyright (c) Philip Wadler. All rights reserved.
+Released under Creative Commons CC-BY License as described in file LICENSE.
+Author: Philip Wadler
+-/
+
+import VersoManual
+import Book.Meta.Lean
+import Book.Papers
+
+/-!
+Book.Naturals: The natural numbers
+-/
+
+-- This gets access to most of the manual genre (which is also useful for
+-- textbooks)
+open Verso.Genre
+open Verso.Genre.Manual
+
+-- This gets access to Lean code that's in code blocks, elaborated in the same
+-- process and environment as Verso
+open Verso.Genre.Manual.InlineLean
+
+
+open Book
+
+set_option pp.rawOnError true
 
 
 
+#doc (Manual) "The Natural Numbers" =>
+
+```savedLean
 #check Nat
 @[class] inductive Test : Type where
 
@@ -120,10 +149,11 @@ def is_zero : Nat → Prop
 | succ _ => False
 
 theorem invert' (m n : Nat) (h : succ m = succ n) : m = n
-  := by injection h with h' ; exact h'
+  := by injection h with h'
 
 theorem succ_neq_zero (n : Nat) (h : succ n = zero) : False
   := by injection h
 
 theorem succ_neq_zero' (n : Nat) (h : succ n = zero) : False
   := by contradiction
+```
