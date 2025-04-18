@@ -1,4 +1,5 @@
 import Lean
+#check Vector
 namespace Hoskinson
 
 #eval Lean.versionString
@@ -95,16 +96,18 @@ instance [OfNat (Γ ⊢ ℕ) n] : OfNat (Γ ⊢ ℕ) (Nat.succ n) where
 
 example : (2  : ∅ ⊢ ℕ) = o +1 +1 := rfl
 
-/-
+@[default_instance]
 instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
   ofNat := Z
 
+@[default_instance]
 instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
   ofNat := S (OfNat.ofNat n)
 
 example : (2 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S S Z := rfl
--/
 
+
+/-
 class OfNatLookup (Γ : TpEnv) (n : Nat) (A : outParam Tp) where
   ofNatLookup : Γ ∋ A
 
@@ -114,17 +117,21 @@ instance : OfNatLookup (Γ ▷ A) Nat.zero A where
 instance [OfNatLookup Γ n B] : OfNatLookup (Γ ▷ A) (Nat.succ n) B where
   ofNatLookup := S (OfNatLookup.ofNatLookup n)
 
+@[default_instance]
+instance [OfNatLookup Γ n A] : OfNat (Γ ∋ A) n where
+  ofNat := OfNatLookup.ofNatLookup n
+-/
+
 -- instance [OfNatLookup Γ n A] : OfNat (Γ ∋ A) n where
 --   ofNat := OfNatLookup.ofNatLookup n
-instance : Coe Nat (Γ ∋ A) where
-  coe n := OfNatLookup.ofNatLookup n
+-- instance : Coe Nat (Γ ∋ A) where
+--   coe n := OfNatLookup.ofNatLookup n
 
-abbrev one : Nat := 1
-example : (one : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S Z := rfl
+example : (1 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S Z := rfl
 
 def plus : Γ ⊢ ℕ ⇒ ℕ ⇒ ℕ :=
   -- μ ƛ ƛ (casesOn (# Z) (# S Z) ((# S S S Z ⬝ # S S Z ⬝ # Z) +1))
-  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # S S Z ⬝ # Z) +1))
+  μ ƛ ƛ (casesOn (# 0) (# 1) ((# 3 ⬝ # 2 ⬝ # 0) +1))
 def two_plus_two : ∅ ⊢ ℕ :=
   plus ⬝ 2 ⬝ 2
 
@@ -133,12 +140,15 @@ def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
   ƛ (# Z +1)
 -- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
 def two_c : Γ ⊢ Ch A :=
-  ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
+  -- ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
+  ƛ ƛ (# 1 ⬝ (# 1 ⬝ # 0))
+
 -- plusᶜ =  ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ # "m" · # "s" · (# "n" · # "s" · # "z")
 def plus_c : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
   ƛ ƛ ƛ ƛ (# S S S Z ⬝ # S Z ⬝ (# S S Z ⬝ # S Z ⬝ # Z))
 def plus_c' : Γ ⊢ Ch A ⇒ Ch A ⇒ Ch A :=
-  ƛ ƛ ƛ ƛ ((# 3 : _ ⊢ Ch A) ⬝ # 1 ⬝ ((# 2 : _ ⊢ Ch A) ⬝ # 1 ⬝ # 0))
+  ƛ ƛ ƛ ƛ (# (3 : _ ∋ Ch A) ⬝ # 1 ⬝ (# (2 : _ ∋ Ch A) ⬝ # 1 ⬝ # 0))
+
 def two : ∅ ⊢ ℕ := two_c ⬝ suc_c ⬝ 0
 
 def rmap (Γ Δ : TpEnv) : Type :=
@@ -157,9 +167,9 @@ def ren_ext {Γ Δ : TpEnv} {A :Tp} (ρ : Γ →ʳ Δ) : (Γ ▷ A →ʳ Δ ▷ 
   | _ , S x  =>  S (ρ x)
 
 def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
-  | _ , (# x) => # (ρ x)
-  | _ , (ƛ N) => ƛ (ren (ren_ext ρ) N)
-  | _ , (L ⬝ M) => ren ρ L ⬝ ren ρ M
+  | _ , # x => # (ρ x)
+  | _ , ƛ N => ƛ (ren (ren_ext ρ) N)
+  | _ , L ⬝ M => ren ρ L ⬝ ren ρ M
   | _ , o => o
   | _ , M +1 => ren ρ M +1
   | _ , casesOn L M N => casesOn (ren ρ L) (ren ρ M) (ren (ren_ext ρ) N)
@@ -168,13 +178,13 @@ def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
 def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
 
 def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
-  | _ , Z  =>  # Z
+  | _ , Z    --=>  # Z
   | _ , S x  =>  lift (σ x)
 
 def sub {Γ Δ : TpEnv} (σ : Γ →ˢ Δ) : Γ →ᵗ Δ
-  | _ , (# x) => σ x
-  | _ , (ƛ N) => ƛ (sub (sub_ext σ) N)
-  | _ , (L ⬝ M) => sub σ L ⬝ sub σ M
+  | _ , # x => σ x
+  | _ , ƛ N => ƛ (sub (sub_ext σ) N)
+  | _ , L ⬝ M => sub σ L ⬝ sub σ M
   | _ , o => o
   | _ , M +1 => sub σ M +1
   | _ , casesOn L M N => casesOn (sub σ L) (sub σ M) (sub (sub_ext σ) N)
@@ -201,7 +211,7 @@ inductive Value : Γ ⊢ A → Type where
 
 open Value
 
-infix:30 "~>" => reduce
+infix:30 " ~> " => reduce
 
 inductive reduce : Γ ⊢ A → Γ ⊢ A → Type where
   | xi_app_1 :
@@ -243,7 +253,7 @@ open reduce
 --                  (star : (Γ ⊢ A) → (Γ ⊢ A) → Type) where
 --   trans := star.two
 
-infix:30 "~>>"  => reduce_many
+infix:30 " ~>> "  => reduce_many
 
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
   | nil :
@@ -521,9 +531,9 @@ example :
     evaluation
       (calc
         (ƛ ƛ # S Z ⬝ (# S Z ⬝ # Z)) ⬝ (ƛ # Z +1) ⬝ o~>(ƛ (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ # Z)) ⬝ o := (beta lambda).xi_app_1
-        _~>(ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o) := (beta zero)
-        _~>(ƛ # Z +1) ⬝ o +1 := (xi_app_2 lambda (beta zero))
-        _~>o +1 +1 := beta zero.succ)
+        _ ~> (ƛ # Z +1) ⬝ ((ƛ # Z +1) ⬝ o) := (beta zero)
+        _ ~> (ƛ # Z +1) ⬝ o +1 := (xi_app_2 lambda (beta zero))
+        _ ~> o +1 +1 := beta zero.succ)
       (Finished.done zero.succ.succ)
   := by
     rfl
