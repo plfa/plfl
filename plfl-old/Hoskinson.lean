@@ -18,7 +18,8 @@ inductive Tp : Type where
 notation:max "ℕ" => Tp.natural
 infixr:70 " ⇒ " => Tp.function
 
-example : Tp := ℕ ⇒ ℕ
+def A₀ := ℕ ⇒ ℕ
+def A₁ := ℕ ⇒ (ℕ ⇒ ℕ)
 
 inductive TpEnv : Type where
   | empty : TpEnv
@@ -28,11 +29,11 @@ inductive TpEnv : Type where
 notation:max "∅" => TpEnv.empty
 infixl:50 " ▷ " => TpEnv.extend
 
-example : TpEnv := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
+def Γ₀ := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
 
-infix:40  " ∋ " => lookup
+infix:40  " ∋ " => Lookup
 
-inductive lookup : TpEnv → Tp → Type where
+inductive Lookup : TpEnv → Tp → Type where
   | stop :
        ---------
        Γ ▷ A ∋ A
@@ -42,12 +43,15 @@ inductive lookup : TpEnv → Tp → Type where
      → Γ ▷ A ∋ B
   deriving Repr, DecidableEq, Lean.ToExpr
 
-prefix:90 "S" => lookup.pop
-notation:max "Z" => lookup.stop
+prefix:90 "S" => Lookup.pop
+notation:max "Z" => Lookup.stop
 
-infix:40  " ⊢ " => term
+example : Γ₀ ∋ ℕ := Z
+example : Γ₀ ∋ ℕ ⇒ ℕ := S Z
 
-inductive term : TpEnv → Tp → Type where
+infix:40  " ⊢ " => Term
+
+inductive Term : TpEnv → Tp → Type where
   | var :
         Γ ∋ A
         ----------
@@ -80,13 +84,13 @@ inductive term : TpEnv → Tp → Type where
       → Γ ⊢ A
   deriving Repr, DecidableEq, Lean.ToExpr
 
-prefix:90 "# " => term.var
-prefix:50 "ƛ " => term.lambda
-infixl:70 " ⬝ " => term.application
-notation:max "o" => term.zero
-postfix:80 " +1" => term.succ
-notation:max "casesOn" => term.case
-prefix:50 "μ " => term.mu
+prefix:90 "# " => Term.var
+prefix:50 "ƛ " => Term.lambda
+infixl:70 " ⬝ " => Term.application
+notation:max "o" => Term.zero
+postfix:80 " +1" => Term.succ
+notation:max "casesOn" => Term.case
+prefix:50 "μ " => Term.mu
 
 instance : OfNat (Γ ⊢ ℕ) Nat.zero where
   ofNat := o
@@ -104,7 +108,7 @@ instance : OfNat (Γ ▷ A ∋ A) Nat.zero where
 instance [OfNat (Γ ∋ B) n] : OfNat (Γ ▷ A ∋ B) (Nat.succ n) where
   ofNat := S (OfNat.ofNat n)
 
-example : (2 : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ∋ ℕ ⇒ ℕ) = S S Z := rfl
+example : ((# 2) : ∅ ▷ ℕ ⇒ ℕ ▷ ℕ ▷ ℕ ⊢ ℕ ⇒ ℕ) = # (S S Z) := rfl
 
 
 /-
@@ -137,7 +141,7 @@ def two_plus_two : ∅ ⊢ ℕ :=
 
 def Ch (A : Tp) : Tp := (A ⇒ A) ⇒ A ⇒ A
 def suc_c : Γ ⊢ ℕ ⇒ ℕ :=
-  ƛ (# Z +1)
+  ƛ ((# Lookup.stop) +1)
 -- twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ # "s" · (# "s" · # "z")
 def two_c : Γ ⊢ Ch A :=
   -- ƛ ƛ (# S Z ⬝ (# S Z ⬝ # Z))
@@ -178,7 +182,7 @@ def ren {Γ Δ : TpEnv} (ρ : Γ →ʳ Δ) : Γ →ᵗ Δ
 def lift {Γ : TpEnv} {A : Tp} : Γ →ᵗ Γ ▷ A := ren (fun x => S x)
 
 def sub_ext {Γ Δ : TpEnv} {A : Tp} (σ : Γ →ˢ Δ) : (Γ ▷ A →ˢ Δ ▷ A)
-  | _ , Z    --=>  # Z
+  | _ , Z    =>  # Z
   | _ , S x  =>  lift (σ x)
 
 def sub {Γ Δ : TpEnv} (σ : Γ →ˢ Δ) : Γ →ᵗ Δ
@@ -198,7 +202,7 @@ def sigma_0 (M : Γ ⊢ A) : Γ ▷ A →ˢ Γ
 def subst {Γ : TpEnv} {A B : Tp} (N : Γ ▷ A ⊢ B) (M : Γ ⊢ A) : Γ ⊢ B
   := sub (sigma_0 M) N
 
-example : subst (ƛ (# S Z ⬝ (# S Z ⬝ # Z))) suc_c = (ƛ (suc_c ⬝ (suc_c ⬝ # Z)) : ∅ ⊢ ℕ ⇒ ℕ) := rfl
+example : subst (ƛ (# 1 ⬝ (# 1 ⬝ # 0))) suc_c = (ƛ (suc_c ⬝ (suc_c ⬝ # 0)) : ∅ ⊢ ℕ ⇒ ℕ) := rfl
 
 inductive Value : Γ ⊢ A → Type where
   | lambda :
@@ -215,7 +219,9 @@ infix:30 " ~> " => reduce
 
 inductive reduce : Γ ⊢ A → Γ ⊢ A → Type where
   | xi_app_1 :
-      L ~> L' → L ⬝ M ~> L' ⬝ M
+      L ~> L'
+      ---------------
+    → L ⬝ M ~> L' ⬝ M
   | xi_app_2 :
       Value V → M ~> M' → V ⬝ M ~> V ⬝ M'
   | beta :
@@ -256,13 +262,14 @@ open reduce
 infix:30 " ~>> "  => reduce_many
 
 inductive reduce_many : Γ ⊢ A → Γ ⊢ A → Type where
-  | nil :
-      ∀ M, M ~>> M
-  | cons :
-      ∀ L, L ~> M
-         → M ~>> N
-           -------
-         → L ~>> N
+  | nil M :
+      -------
+      M ~>> M
+  | cons L :
+      L ~> M
+    → M ~>> N
+      -------
+    → L ~>> N
   deriving Repr, Lean.ToExpr
 
 open reduce_many
@@ -275,7 +282,6 @@ instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := one_one
 
-/-
 def one_many : (L ~> M) → (M ~>> N) → (L ~>> N)
   | L_to_M, M_to_N => cons _ L_to_M M_to_N
 
@@ -283,7 +289,7 @@ instance : Trans (.~>.  : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type)
                  (.~>>. : Γ ⊢ A → Γ ⊢ A → Type) where
   trans := one_many
--/
+
 
 def many_one : (L ~>> M) → (M ~> N) → (L ~>> N)
   | nil _, M_to_N  => cons _ M_to_N (nil _)
@@ -361,6 +367,11 @@ abbrev progress : ∀ (M : ∅ ⊢ A), Progress M
               | Value.zero => step beta_zero
               | Value.succ v => step (beta_succ v)
   | (μ N) => step beta_mu
+
+def progress' : ∀ (M : ∅ ⊢ A), Progress M := by
+  intro M
+  induction M
+
 
 inductive Finished (N : ∅ ⊢ A) : Type where
   | done : Value N → Finished N
@@ -488,7 +499,7 @@ example :
 
 /-
 open Lean Elab Meta Command in
-elab tk:"#reduce_full" t:term : command => do
+elab tk:"#reduce_full" t:Term : command => do
   withoutModifyingEnv <| runTermElabM fun _ => Term.withDeclName `_reduce do
     let e ← Term.elabTerm t none
     Term.synthesizeSyntheticMVarsNoPostponing
