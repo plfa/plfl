@@ -32,3 +32,11 @@ If you see this as useful (either as a potential user or contributor), please ge
 
 All the best,
 Fabrizio
+
+# Other resources
+
+An Introduction to Lean 4: An Introduction to Formal Verification
+https://www.uv.es/coslloen/Lean4/
+
+The Hitchhiker's Guide to Lean
+https://github.com/lean-forward/logical_verification_2025/blob/main/hitchhikers_guide_2025_desktop.pdf
