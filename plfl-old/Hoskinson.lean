@@ -31,7 +31,7 @@ infixl:50 " ▷ " => TpEnv.extend
 
 def Γ₀ := ∅ ▷ ℕ ⇒ ℕ ▷ ℕ
 
-infix:40  " ∋ " => Lookup
+infix:40 " ∋ " => Lookup
 
 inductive Lookup : TpEnv → Tp → Type where
   | stop :
